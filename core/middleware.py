@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from core.auth import decode_jwt_token
 from core.database import engine
-from models.user import User
+from models import User
 
 
 EXCLUDED_PATHS = {"/users/login"}

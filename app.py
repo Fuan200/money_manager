@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from core.middleware import jwt_auth_middleware
 
-from controllers.users import users
+from routes.users import users
 
 
 app = FastAPI()
