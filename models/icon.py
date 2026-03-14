@@ -5,20 +5,16 @@ from datetime import datetime, timezone
 
 from models.account import Account
 from models.category import Category
-from models.transfer import Transfer
-from models.transaction import Transaction
 
 
-class User(SQLModel, table=True):
+class Icon(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)})
 
-    email: str = Field(unique=True, index=True)
-    password_hash: str
+    label: str = Field(nullable=False)
+    url: str = Field(nullable=False)
 
-    accounts: List["Account"] = Relationship(back_populates="user")
-    categories: List["Category"] = Relationship(back_populates="user")
-    transactions: List["Transaction"] = Relationship(back_populates="user")
-    transfers: List["Transfer"] = Relationship(back_populates="user")
+    accounts: List["Account"] = Relationship(back_populates="icon")
+    categories: List["Category"] = Relationship(back_populates="icon")
