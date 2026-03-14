@@ -6,7 +6,7 @@ from email_validator import validate_email, EmailNotValidError
 
 from core.auth import create_jwt_token, verify_password
 from core.database import get_session
-from models.user import User
+from models import User
 from core.security import hash_password
 from schema.user import AuthResponse, CreateUser, LoginDto, UpdateUser, UserPublic
 
