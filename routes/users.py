@@ -13,11 +13,13 @@ from schema.user import AuthResponse, CreateUser, LoginDto, UpdateUser, UserPubl
 
 users = APIRouter(prefix="/users", tags=["users"])
 
+
 @users.get("/get-all", response_model=SuccessResponse[List[UserPublic]])
 def get_users(session: Session = Depends(get_session)):
     statement = select(User).order_by(User.created_at.desc())
     users = session.exec(statement).all()
     return {"success": True, "data": users}
+
 
 @users.get("/get-by-id/{id}", response_model=SuccessResponse[UserPublic])
 def get_user(id: UUID, session: Session = Depends(get_session)):
@@ -27,6 +29,7 @@ def get_user(id: UUID, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="USER NOT FOUND")
 
     return {"success": True, "data": user}
+
 
 @users.post("/create-user", response_model=SuccessResponse[UserPublic])
 def create_user(user_data: CreateUser, session: Session = Depends(get_session)):
@@ -41,13 +44,17 @@ def create_user(user_data: CreateUser, session: Session = Depends(get_session)):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = User(email=user_data.email, password_hash=hash_password(user_data.password),)
+    user = User(
+        email=user_data.email,
+        password_hash=hash_password(user_data.password),
+    )
 
     session.add(user)
     session.commit()
     session.refresh(user)
 
     return {"success": True, "data": user}
+
 
 @users.put("/update-user/{id}", response_model=SuccessResponse[UserPublic])
 def update_user(id: UUID, user_data: UpdateUser, session: Session = Depends(get_session)):
@@ -73,6 +80,7 @@ def update_user(id: UUID, user_data: UpdateUser, session: Session = Depends(get_
 
     return {"success": True, "data": user}
 
+
 @users.delete("/delete-user/{id}", response_model=SuccessResponse[UserPublic])
 def delete_user(id: UUID, session: Session = Depends(get_session)):
     user = session.get(User, id)
@@ -84,6 +92,7 @@ def delete_user(id: UUID, session: Session = Depends(get_session)):
     session.commit()
 
     return {"success": True, "data": user}
+
 
 @users.post("/login", response_model=SuccessResponse[AuthResponse])
 def login(login_dto: LoginDto, session: Session = Depends(get_session)):

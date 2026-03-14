@@ -6,9 +6,11 @@ from core.auth import decode_jwt_token
 from core.database import engine
 from models import User
 
-
 EXCLUDED_PATHS = {"/users/login"}
-UNAUTHORIZED = JSONResponse(status_code=401,content={"success": False, "error": "UNAUTHORIZED"},)
+UNAUTHORIZED = JSONResponse(
+    status_code=401,
+    content={"success": False, "error": "UNAUTHORIZED"},
+)
 
 
 async def jwt_auth_middleware(request: Request, call_next):
@@ -27,7 +29,7 @@ async def jwt_auth_middleware(request: Request, call_next):
 
     try:
         payload = decode_jwt_token(token)
-        print(f'Payload: {payload}')
+        print(f"Payload: {payload}")
         user_id = payload.get("sub")
         if not user_id:
             return UNAUTHORIZED
