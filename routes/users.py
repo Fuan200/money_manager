@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session, select
 from email_validator import validate_email, EmailNotValidError
 from uuid import UUID
@@ -105,3 +105,12 @@ def login(login_dto: LoginDto, session: Session = Depends(get_session)):
     token = create_jwt_token(payload)
 
     return {"success": True, "data": {"email": user.email, "token": token}}
+
+def get_current_user(request: Request) -> User:
+    user = getattr(request.state, "user", None)
+    if not user:
+        raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+    return user
+
+def get_current_user_id(request: Request) -> str:
+    return str(get_current_user(request).id)

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from core.middleware import jwt_auth_middleware
 
 from routes.users import users
+from routes.account import accounts
 
 app = FastAPI()
 
@@ -17,3 +18,4 @@ def hello_world():
 
 
 app.include_router(users)
+app.include_router(accounts)

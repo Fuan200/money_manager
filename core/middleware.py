@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 
@@ -29,7 +29,6 @@ async def jwt_auth_middleware(request: Request, call_next):
 
     try:
         payload = decode_jwt_token(token)
-        print(f"Payload: {payload}")
         user_id = payload.get("sub")
         if not user_id:
             return UNAUTHORIZED
