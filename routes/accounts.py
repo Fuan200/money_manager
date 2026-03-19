@@ -4,7 +4,7 @@ from uuid import UUID
 from typing import List
 
 from core.database import get_session
-from routes.users import get_current_user, get_current_user
+from routes.users import get_current_user
 from models import Account, Icon, User
 
 from schema.account import AccountPublic, CreateAccount, UpdateAccount, SuccessResponse
@@ -80,7 +80,7 @@ def delete_user(id: UUID, session: Session = Depends(get_session)):
     account = session.get(Account, id)
 
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
     session.delete(account)
     session.commit()
