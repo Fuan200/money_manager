@@ -53,7 +53,7 @@ def create_account(account_data: CreateAccount, session: Session = Depends(get_s
 
 
 @accounts.patch("/update-account/{id}", response_model=SuccessResponse[AccountPublic])
-def update_account(id: UUID, account_data: UpdateAccount, session=Depends(get_session)):
+def update_account(id: UUID, account_data: UpdateAccount, session = Depends(get_session)):
     account = session.get(Account, id)
 
     if not account:
@@ -76,7 +76,7 @@ def update_account(id: UUID, account_data: UpdateAccount, session=Depends(get_se
 
 
 @accounts.delete("/delete-account/{id}", response_model=SuccessResponse[AccountPublic])
-def delete_user(id: UUID, session: Session = Depends(get_session)):
+def delete_account(id: UUID, session: Session = Depends(get_session)):
     account = session.get(Account, id)
 
     if not account:
