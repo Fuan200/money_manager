@@ -1,0 +1,15 @@
+/* Forest Adventure - https://coolors.co/131515-2b2c28-339989-7de2d1-fffafb */
+
+/* CSS HEX */
+--onyx: #131515ff;
+--graphite: #2b2c28ff;
+--verdigris: #339989ff;
+--pearl-aqua: #7de2d1ff;
+--snow: #fffafbff;
+
+/* CSS HSL */
+--onyx: hsla(180, 5%, 8%, 1);
+--graphite: hsla(75, 5%, 16%, 1);
+--verdigris: hsla(171, 50%, 40%, 1);
+--pearl-aqua: hsla(170, 64%, 69%, 1);
+--snow: hsla(348, 100%, 99%, 1);
