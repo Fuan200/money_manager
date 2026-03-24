@@ -82,6 +82,7 @@ Rules:
 - Do NOT use inline styles.
 - Use global CSS or component CSS.
 - Strictly only use the color palette from `src/assets/palette.txt`.
+- The aplication must be in a Dark mode style.
 - Use reusable components (buttons, inputs, cards).
 - Separate UI and logic.
 
