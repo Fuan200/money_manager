@@ -7,6 +7,14 @@ from uuid import UUID
 T = TypeVar("T")
 
 
+class AccountIconPublic(BaseModel):
+    id: UUID
+    label: str
+    url: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class AccountPublic(BaseModel):
     id: UUID
 
@@ -17,6 +25,7 @@ class AccountPublic(BaseModel):
     balance: Decimal
     balance_include: bool
     saving: bool
+    icon: Optional[AccountIconPublic] = None
 
     model_config = ConfigDict(from_attributes=True)
 

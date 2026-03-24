@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 from uuid import UUID
 from typing import List
 
@@ -12,16 +13,26 @@ from schema.account import AccountPublic, CreateAccount, UpdateAccount, SuccessR
 accounts = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
+def load_account_with_icon(session: Session, account_id: UUID) -> Account | None:
+    statement = select(Account).options(selectinload(Account.icon)).where(Account.id == account_id)
+    return session.exec(statement).first()
+
+
 @accounts.get("/get-all-accounts-by-user", response_model=SuccessResponse[List[AccountPublic]])
 def get_accounts(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    statement = select(Account).where(Account.user_id == current_user.id).order_by(Account.created_at.desc())
+    statement = (
+        select(Account)
+        .options(selectinload(Account.icon))
+        .where(Account.user_id == current_user.id)
+        .order_by(Account.created_at.desc())
+    )
     accounts = session.exec(statement).all()
     return {"success": True, "data": accounts}
 
 
 @accounts.get("/get-account-by-id/{id}", response_model=SuccessResponse[AccountPublic])
 def get_account(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    account = session.get(Account, id)
+    account = load_account_with_icon(session, id)
 
     if not account or account.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
@@ -47,9 +58,9 @@ def create_account(account_data: CreateAccount, session: Session = Depends(get_s
 
     session.add(account)
     session.commit()
-    session.refresh(account)
 
-    return {"success": True, "data": account}
+    created_account = load_account_with_icon(session, account.id)
+    return {"success": True, "data": created_account}
 
 
 @accounts.patch("/update-account/{id}", response_model=SuccessResponse[AccountPublic])
@@ -70,9 +81,9 @@ def update_account(id: UUID, account_data: UpdateAccount, session = Depends(get_
 
     session.add(account)
     session.commit()
-    session.refresh(account)
 
-    return {"success": True, "data": account}
+    updated_account = load_account_with_icon(session, account.id)
+    return {"success": True, "data": updated_account}
 
 
 @accounts.delete("/delete-account/{id}", response_model=SuccessResponse[AccountPublic])
