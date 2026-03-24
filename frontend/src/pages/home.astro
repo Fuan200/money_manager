@@ -1,0 +1,127 @@
+---
+import { HomeDashboard } from '../components/HomeDashboard';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Money Manager | Home">
+	<main class="home-page">
+		<HomeDashboard client:load />
+	</main>
+</Layout>
+
+<style>
+	:global(body) {
+		min-height: 100vh;
+		background:
+			radial-gradient(circle at top left, rgba(125, 226, 209, 0.14), transparent 28%),
+			linear-gradient(145deg, #131515 0%, #2b2c28 48%, #131515 100%);
+		color: #fffafb;
+	}
+
+	.home-page {
+		min-height: 100vh;
+		padding: clamp(1.25rem, 3vw, 3rem);
+		box-sizing: border-box;
+	}
+
+	:global(.home-shell) {
+		display: grid;
+		gap: 1.25rem;
+		max-width: 72rem;
+		margin: 0 auto;
+	}
+
+	:global(.summary-card),
+	:global(.info-card) {
+		border: 1px solid rgba(125, 226, 209, 0.12);
+		border-radius: 1.6rem;
+		background: rgba(43, 44, 40, 0.78);
+		box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.24);
+		backdrop-filter: blur(14px);
+	}
+
+	:global(.summary-card) {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: clamp(1.4rem, 3vw, 2.25rem);
+	}
+
+	:global(.panel-grid) {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	:global(.info-card) {
+		padding: 1.5rem;
+	}
+
+	:global(.panel-label) {
+		margin: 0 0 0.8rem;
+		color: #339989;
+		font-size: 0.78rem;
+		font-weight: 700;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+
+	:global(.summary-card h1),
+	:global(.info-card h2) {
+		margin: 0;
+		letter-spacing: -0.04em;
+	}
+
+	:global(.summary-card h1) {
+		font-size: clamp(2rem, 4vw, 3.25rem);
+	}
+
+	:global(.info-card h2) {
+		font-size: 1.35rem;
+	}
+
+	:global(.panel-copy) {
+		margin: 0.9rem 0 0;
+		color: rgba(255, 250, 251, 0.7);
+		font-size: 0.98rem;
+		line-height: 1.7;
+	}
+
+	:global(.ghost-button) {
+		padding: 0.9rem 1.1rem;
+		border: 1px solid rgba(125, 226, 209, 0.2);
+		border-radius: 999px;
+		background: rgba(19, 21, 21, 0.7);
+		color: #fffafb;
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease,
+			transform 0.2s ease;
+	}
+
+	:global(.ghost-button:hover),
+	:global(.ghost-button:focus-visible) {
+		background: #339989;
+		color: #131515;
+		transform: translateY(-1px);
+	}
+
+	:global(.ghost-button:focus-visible) {
+		outline: 0.2rem solid rgba(125, 226, 209, 0.55);
+		outline-offset: 0.15rem;
+	}
+
+	@media (max-width: 900px) {
+		:global(.panel-grid) {
+			grid-template-columns: 1fr;
+		}
+
+		:global(.summary-card) {
+			flex-direction: column;
+		}
+	}
+</style>
