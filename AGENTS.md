@@ -88,6 +88,28 @@ Rules:
 
 ---
 
+## Styling Rules
+
+- Use a global stylesheet (`src/styles/global.css`) for base styles:
+  - resets
+  - typography
+  - CSS variables (colors, spacing)
+
+- The primary font must be **Geist Sans**.
+
+- All colors must be defined using the palette located at:
+  `src/assets/palette.txt`
+
+- Do NOT hardcode colors in components.
+- Use CSS variables derived from the palette.
+
+- Import global styles in the main layout.
+
+- Use scoped or component-level styles for UI components.
+- Avoid putting component-specific styles in global CSS.
+
+---
+
 ## API Response Format
 
 Success:

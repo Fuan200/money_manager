@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap');
+
+:root {
+	color-scheme: dark;
+	font-family: 'Geist', 'Geist Sans', 'Segoe UI', 'Aptos', sans-serif;
+
+	/* Palette derived from src/assets/palette.txt */
+	--color-onyx: #131515;
+	--color-graphite: #2b2c28;
+	--color-verdigris: #339989;
+	--color-pearl-aqua: #7de2d1;
+	--color-snow: #fffafb;
+
+	/* RGB channels for alpha-based surfaces and shadows */
+	--color-onyx-rgb: 19, 21, 21;
+	--color-graphite-rgb: 43, 44, 40;
+	--color-verdigris-rgb: 51, 153, 137;
+	--color-pearl-aqua-rgb: 125, 226, 209;
+	--color-snow-rgb: 255, 250, 251;
+
+	/* Semantic tokens */
+	--color-bg: var(--color-onyx);
+	--color-surface: var(--color-graphite);
+	--color-surface-strong: rgba(var(--color-graphite-rgb), 0.78);
+	--color-surface-muted: rgba(var(--color-onyx-rgb), 0.72);
+	--color-border: rgba(var(--color-pearl-aqua-rgb), 0.14);
+	--color-border-strong: rgba(var(--color-pearl-aqua-rgb), 0.3);
+	--color-text: var(--color-snow);
+	--color-text-muted: rgba(var(--color-snow-rgb), 0.72);
+	--color-text-soft: rgba(var(--color-snow-rgb), 0.62);
+	--color-accent: var(--color-verdigris);
+	--color-accent-strong: var(--color-pearl-aqua);
+	--color-accent-soft: rgba(var(--color-pearl-aqua-rgb), 0.16);
+	--color-accent-wash: rgba(var(--color-verdigris-rgb), 0.14);
+	--color-focus-ring: rgba(var(--color-pearl-aqua-rgb), 0.55);
+	--color-shadow: rgba(0, 0, 0, 0.28);
+
+	--radius-sm: 0.95rem;
+	--radius-md: 1.25rem;
+	--radius-lg: 1.6rem;
+	--radius-xl: 1.75rem;
+	--radius-pill: 999px;
+
+	--space-xs: 0.5rem;
+	--space-sm: 0.75rem;
+	--space-md: 1rem;
+	--space-lg: 1.5rem;
+	--space-xl: 2rem;
+
+	--shadow-soft: 0 1rem 2.5rem rgba(0, 0, 0, 0.24);
+	--shadow-elevated: 0 1.5rem 4rem rgba(0, 0, 0, 0.34);
+	--transition-standard: 0.2s ease;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 16px;
+	scroll-behavior: smooth;
+}
+
+body {
+	min-width: 320px;
+	min-height: 100vh;
+	margin: 0;
+	background:
+		radial-gradient(circle at top left, rgba(var(--color-pearl-aqua-rgb), 0.14), transparent 28%),
+		linear-gradient(145deg, var(--color-bg) 0%, var(--color-surface) 48%, var(--color-bg) 100%);
+	color: var(--color-text);
+	font-family: inherit;
+	line-height: 1.5;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+main {
+	width: 100%;
+}
+
+img,
+picture,
+svg,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+	-webkit-tap-highlight-color: transparent;
+}
+
+a {
+	color: var(--color-accent);
+	text-decoration: none;
+	transition:
+		color var(--transition-standard),
+		opacity var(--transition-standard);
+}
+
+a:hover,
+a:focus-visible {
+	color: var(--color-accent-strong);
+}
+
+button {
+	border: 0;
+	background: none;
+	color: inherit;
+}
+
+button,
+[role='button'] {
+	cursor: pointer;
+}
+
+::selection {
+	background: rgba(var(--color-pearl-aqua-rgb), 0.28);
+	color: var(--color-text);
+}
+
+:focus-visible {
+	outline: 0.2rem solid var(--color-focus-ring);
+	outline-offset: 0.15rem;
+}
