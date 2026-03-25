@@ -1,16 +1,64 @@
 import { useEffect, useState } from 'preact/hooks';
-import { clearAuthSession, readAuthSession } from '../lib/auth';
+import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
+import { TransactionFormModal, type TransactionFormState } from './TransactionFormModal';
+import type { JSX } from 'preact/jsx-runtime';
 
 interface SessionState {
 	email: string;
+	token: string;
+}
+
+interface SelectItem {
+	id: string;
+	name: string;
+	type?: boolean;
+	icon?: {
+		id: string;
+		label: string;
+		url: string;
+	} | null;
+}
+
+interface UserTransaction {
+	id: string;
+	amount: string;
+	description: string;
+	type: boolean;
+	transaction_date: string;
+	category: {
+		id: string;
+		name: string;
+		type: boolean;
+		icon: {
+			id: string;
+			label: string;
+			url: string;
+		} | null;
+	};
 }
 
 export function HomeDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
 		const session = readAuthSession();
-		return session ? { email: session.email } : null;
+		return session ? { email: session.email, token: session.token } : null;
+	});
+	const [accounts, setAccounts] = useState<SelectItem[]>([]);
+	const [categories, setCategories] = useState<SelectItem[]>([]);
+	const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+	const [isLoadingOptions, setIsLoadingOptions] = useState<boolean>(true);
+	const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
+	const [submitError, setSubmitError] = useState<string>('');
+	const [submitSuccess, setSubmitSuccess] = useState<string>('');
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+	const [transactionFormState, setTransactionFormState] = useState<TransactionFormState>({
+		amount: '',
+		description: '',
+		type: false,
+		transactionDate: new Date().toISOString().slice(0, 16),
+		accountId: '',
+		categoryId: '',
 	});
 
 	useEffect(() => {
@@ -19,9 +67,185 @@ export function HomeDashboard() {
 		}
 	}, [sessionState]);
 
+	useEffect(() => {
+		if (!sessionState) {
+			return;
+		}
+
+		void loadTransactionOptions(sessionState.token);
+	}, [sessionState]);
+
 	const handleSignOut = () => {
 		clearAuthSession();
 		window.location.replace('/');
+	};
+
+	const expenseCategories = categories.filter((category) => !category.type);
+	const incomeCategories = categories.filter((category) => category.type);
+	const availableCategories = transactionFormState.type ? incomeCategories : expenseCategories;
+
+	const loadTransactionOptions = async (token: string) => {
+		setIsLoadingOptions(true);
+
+		try {
+			const [accountsResponse, categoriesResponse] = await Promise.all([
+				fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
+				fetch(`${apiBaseUrl}/categories/get-all-categories-by-user`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
+			]);
+
+			if (!accountsResponse.ok || !categoriesResponse.ok) {
+				throw new Error('Unable to load transaction options.');
+			}
+
+			const accountsPayload = (await accountsResponse.json()) as { data: SelectItem[] };
+			const categoriesPayload = (await categoriesResponse.json()) as { data: SelectItem[] };
+
+			setAccounts(accountsPayload.data);
+			setCategories(categoriesPayload.data);
+			await loadTransactions(token);
+		} catch (error) {
+			setSubmitError(error instanceof Error ? error.message : 'Unable to load transaction options.');
+		} finally {
+			setIsLoadingOptions(false);
+		}
+	};
+
+	const loadTransactions = async (token: string) => {
+		const response = await fetch(`${apiBaseUrl}/transactions/get-all-transactions-by-user`, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error('Unable to load transactions.');
+		}
+
+		const payload = (await response.json()) as { data: UserTransaction[] };
+		setTransactions(payload.data);
+	};
+
+	const resetTransactionForm = () => {
+		setTransactionFormState({
+			amount: '',
+			description: '',
+			type: false,
+			transactionDate: new Date().toISOString().slice(0, 16),
+			accountId: '',
+			categoryId: '',
+		});
+	};
+
+	const openTransactionModal = () => {
+		setSubmitError('');
+		setIsTransactionModalOpen(true);
+	};
+
+	const closeTransactionModal = () => {
+		setIsTransactionModalOpen(false);
+		setSubmitError('');
+	};
+
+	const updateTransactionField = <K extends keyof TransactionFormState>(
+		field: K,
+		value: TransactionFormState[K],
+	) => {
+		setTransactionFormState((currentState) => {
+			const nextState = {
+				...currentState,
+				[field]: value,
+			};
+
+			if (field === 'type') {
+				nextState.categoryId = '';
+			}
+
+			return nextState;
+		});
+	};
+
+	const handleTransactionSubmit = async (
+		event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>,
+	) => {
+		event.preventDefault();
+
+		if (!sessionState) {
+			return;
+		}
+
+		setSubmitError('');
+		setSubmitSuccess('');
+
+		if (!transactionFormState.amount.trim()) {
+			setSubmitError('Amount is required.');
+			return;
+		}
+
+		if (!transactionFormState.description.trim()) {
+			setSubmitError('Description is required.');
+			return;
+		}
+
+		if (!transactionFormState.accountId) {
+			setSubmitError('Account is required.');
+			return;
+		}
+
+		if (!transactionFormState.categoryId) {
+			setSubmitError('Category is required.');
+			return;
+		}
+
+		if (!transactionFormState.transactionDate) {
+			setSubmitError('Transaction date is required.');
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch(`${apiBaseUrl}/transactions/create-transaction`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${sessionState.token}`,
+				},
+				body: JSON.stringify({
+					amount: transactionFormState.amount.trim(),
+					description: transactionFormState.description.trim(),
+					type: transactionFormState.type,
+					transaction_date: new Date(transactionFormState.transactionDate).toISOString(),
+					account_id: transactionFormState.accountId,
+					category_id: transactionFormState.categoryId,
+					external_expense: false,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorPayload = (await response.json().catch(() => null)) as
+					| { error?: string; detail?: string }
+					| null;
+				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to create transaction.';
+				throw new Error(backendError);
+			}
+
+			setSubmitSuccess('Transaction created successfully.');
+			resetTransactionForm();
+			closeTransactionModal();
+			await loadTransactions(sessionState.token);
+		} catch (error) {
+			setSubmitError(error instanceof Error ? error.message : 'Unable to create transaction.');
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (
@@ -30,48 +254,76 @@ export function HomeDashboard() {
 
 			<div class="app-content">
 				{sessionState ? (
+					<button type="button" class="primary-button" onClick={openTransactionModal}>
+						New transaction
+					</button>
+				) : null}
+
+				{submitSuccess ? (
+					<p class="success-banner" role="status">
+						{submitSuccess}
+					</p>
+				) : null}
+
+				{sessionState ? (
 					<>
-						<header class="summary-card">
-							<div>
-								<p class="panel-label">Signed in</p>
-								<h1>Welcome, {sessionState.email}</h1>
-								<p class="panel-copy">
-									Your account is ready. This simple home view is the first screen after a successful
-									login and gives you a clean starting point for the rest of the app.
-								</p>
-							</div>
-						</header>
+						<section class="accounts-list-section">
+							{transactions.length > 0 ? (
+								<div class="transactions-stack">
+									{transactions.map((transaction) => (
+										<div class="transaction-row" key={transaction.id}>
+											<div class="account-leading">
+												<div class="account-icon-wrap" aria-hidden="true">
+													{transaction.category.icon?.url ? (
+														<img
+															src={transaction.category.icon.url}
+															alt=""
+															class="account-icon"
+															loading="lazy"
+														/>
+													) : (
+														<span class="account-icon-fallback">
+															{transaction.category.name.slice(0, 1).toUpperCase()}
+														</span>
+													)}
+												</div>
 
-						<div class="panel-grid">
-							<article class="info-card">
-								<p class="panel-label">Accounts</p>
-								<h2>Keep balances visible</h2>
-								<p class="panel-copy">
-									Use this area to show current account totals and the latest movement for each account.
-								</p>
-							</article>
+												<div class="account-copy">
+													<h3>{transaction.category.name}</h3>
+													<p class="account-meta">{transaction.description}</p>
+												</div>
+											</div>
 
-							<article class="info-card">
-								<p class="panel-label">Budgets</p>
-								<h2>Monitor category limits</h2>
-								<p class="panel-copy">
-									Add monthly budget progress here so the user sees risk areas immediately after login.
-								</p>
-							</article>
-
-							<article class="info-card">
-								<p class="panel-label">Activity</p>
-								<h2>Review recent transactions</h2>
-								<p class="panel-copy">
-									A recent activity feed fits naturally in this section once transaction endpoints are wired.
-								</p>
-							</article>
-						</div>
+											<p class={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}>
+												{transaction.type ? '+' : '-'}${transaction.amount}
+											</p>
+										</div>
+									))}
+								</div>
+							) : (
+								<div class="account-row-card">
+									<p class="panel-copy">No transactions yet.</p>
+								</div>
+							)}
+						</section>
 					</>
 				) : null}
 			</div>
 
-			{!sessionState ? <LoadingOverlay label="Loading home" /> : null}
+			{!sessionState || isLoadingOptions ? <LoadingOverlay label="Loading home" /> : null}
+
+			{isTransactionModalOpen ? (
+				<TransactionFormModal
+					formState={transactionFormState}
+					isSubmitting={isSubmitting}
+					submitError={submitError}
+					accounts={accounts}
+					categories={availableCategories}
+					onClose={closeTransactionModal}
+					onSubmit={handleTransactionSubmit}
+					onFieldChange={updateTransactionField}
+				/>
+			) : null}
 		</section>
 	);
 }

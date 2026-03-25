@@ -283,12 +283,6 @@ export function CategoriesDashboard() {
 				) : null}
 
 				<section class="accounts-list-section">
-					<div class="section-heading">
-						<div>
-							<p class="panel-label">Your categories</p>
-						</div>
-					</div>
-
 					{categoriesError ? (
 						<p class="error-banner" role="alert">
 							{categoriesError}

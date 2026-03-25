@@ -297,12 +297,6 @@ export function AccountsDashboard() {
 				) : null}
 
 				<section class="accounts-list-section">
-					<div class="section-heading">
-						<div>
-							<p class="panel-label">Your accounts</p>
-						</div>
-					</div>
-
 					{accountsError ? (
 						<p class="error-banner" role="alert">
 							{accountsError}
