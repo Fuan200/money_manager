@@ -3,6 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AccountFormModal, type AccountFormState } from './AccountFormModal';
 import { AppHeader } from './AppHeader';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface SessionState {
 	email: string;
@@ -39,7 +40,10 @@ interface AccountsListResponse {
 }
 
 export function AccountsDashboard() {
-	const [sessionState, setSessionState] = useState<SessionState | null>(null);
+	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
+		const session = readAuthSession();
+		return session ? { email: session.email, token: session.token } : null;
+	});
 	const [accounts, setAccounts] = useState<UserAccount[]>([]);
 	const [isLoadingAccounts, setIsLoadingAccounts] = useState<boolean>(true);
 	const [accountsError, setAccountsError] = useState<string>('');
@@ -57,14 +61,10 @@ export function AccountsDashboard() {
 	});
 
 	useEffect(() => {
-		const session = readAuthSession();
-		if (!session) {
+		if (!sessionState) {
 			window.location.replace('/');
-			return;
 		}
-
-		setSessionState({ email: session.email, token: session.token });
-	}, []);
+	}, [sessionState]);
 
 	useEffect(() => {
 		if (!sessionState) {
@@ -275,31 +275,20 @@ export function AccountsDashboard() {
 		}
 	};
 
-	if (!sessionState) {
-		return (
-			<section class="app-shell">
-				<div class="app-content">
-					<div class="summary-card">
-						<p class="panel-label">Loading session</p>
-						<h1>Preparing your accounts view...</h1>
-					</div>
-				</div>
-			</section>
-		);
-	}
-
 	return (
 		<section class="app-shell">
-			<AppHeader activeTab="accounts" onSignOut={handleSignOut} />
+			{sessionState ? <AppHeader activeTab="accounts" onSignOut={handleSignOut} /> : null}
 
 			<div class="app-content">
-				<button
-					type="button"
-					class="primary-button"
-					onClick={openCreateModal}
-				>
-					New account
-				</button>
+				{sessionState ? (
+					<button
+						type="button"
+						class="primary-button"
+						onClick={openCreateModal}
+					>
+						New account
+					</button>
+				) : null}
 
 				{submitSuccess ? (
 					<p class="success-banner" role="status">
@@ -320,15 +309,7 @@ export function AccountsDashboard() {
 						</p>
 					) : null}
 
-					{isLoadingAccounts ? (
-						<div class="accounts-stack">
-							<div class="account-row-card">
-								<p class="panel-copy">Loading accounts...</p>
-							</div>
-						</div>
-					) : null}
-
-					{!isLoadingAccounts && !accountsError && accounts.length === 0 ? (
+					{sessionState && !isLoadingAccounts && !accountsError && accounts.length === 0 ? (
 						<div class="accounts-stack">
 							<div class="account-row-card">
 								<p class="panel-copy">No accounts found for this user yet.</p>
@@ -336,7 +317,7 @@ export function AccountsDashboard() {
 						</div>
 					) : null}
 
-					{!isLoadingAccounts && accounts.length > 0 ? (
+					{sessionState && !isLoadingAccounts && accounts.length > 0 ? (
 						<div class="accounts-stack">
 							{accounts.map((account) => (
 								<button
@@ -377,6 +358,8 @@ export function AccountsDashboard() {
 					) : null}
 				</section>
 			</div>
+
+			{!sessionState || isLoadingAccounts ? <LoadingOverlay label="Loading accounts" /> : null}
 
 			{modalMode ? (
 				<AccountFormModal

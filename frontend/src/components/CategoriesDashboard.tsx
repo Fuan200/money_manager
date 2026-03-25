@@ -3,6 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AppHeader } from './AppHeader';
 import { CategoryFormModal, type CategoryFormState } from './CategoryFormModal';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface SessionState {
 	email: string;
@@ -40,7 +41,10 @@ interface CategoriesListResponse {
 }
 
 export function CategoriesDashboard() {
-	const [sessionState, setSessionState] = useState<SessionState | null>(null);
+	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
+		const session = readAuthSession();
+		return session ? { email: session.email, token: session.token } : null;
+	});
 	const [categories, setCategories] = useState<UserCategory[]>([]);
 	const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(true);
 	const [categoriesError, setCategoriesError] = useState<string>('');
@@ -58,14 +62,10 @@ export function CategoriesDashboard() {
 	const incomeCategories = categories.filter((category) => category.type);
 
 	useEffect(() => {
-		const session = readAuthSession();
-		if (!session) {
+		if (!sessionState) {
 			window.location.replace('/');
-			return;
 		}
-
-		setSessionState({ email: session.email, token: session.token });
-	}, []);
+	}, [sessionState]);
 
 	useEffect(() => {
 		if (!sessionState) {
@@ -265,27 +265,16 @@ export function CategoriesDashboard() {
 		}
 	};
 
-	if (!sessionState) {
-		return (
-			<section class="app-shell">
-				<div class="app-content">
-					<div class="summary-card">
-						<p class="panel-label">Loading session</p>
-						<h1>Preparing your categories view...</h1>
-					</div>
-				</div>
-			</section>
-		);
-	}
-
 	return (
 		<section class="app-shell">
-			<AppHeader activeTab="categories" onSignOut={handleSignOut} />
+			{sessionState ? <AppHeader activeTab="categories" onSignOut={handleSignOut} /> : null}
 
 			<div class="app-content">
-				<button type="button" class="primary-button" onClick={openCreateModal}>
-					New category
-				</button>
+				{sessionState ? (
+					<button type="button" class="primary-button" onClick={openCreateModal}>
+						New category
+					</button>
+				) : null}
 
 				{submitSuccess ? (
 					<p class="success-banner" role="status">
@@ -306,15 +295,7 @@ export function CategoriesDashboard() {
 						</p>
 					) : null}
 
-					{isLoadingCategories ? (
-						<div class="accounts-stack">
-							<div class="account-row-card">
-								<p class="panel-copy">Loading categories...</p>
-							</div>
-						</div>
-					) : null}
-
-					{!isLoadingCategories && !categoriesError && categories.length === 0 ? (
+					{sessionState && !isLoadingCategories && !categoriesError && categories.length === 0 ? (
 						<div class="accounts-stack">
 							<div class="account-row-card">
 								<p class="panel-copy">No categories found for this user yet.</p>
@@ -322,7 +303,7 @@ export function CategoriesDashboard() {
 						</div>
 					) : null}
 
-					{!isLoadingCategories && categories.length > 0 ? (
+					{sessionState && !isLoadingCategories && categories.length > 0 ? (
 						<div class="category-sections">
 							<section class="category-section">
 								<div class="section-heading">
@@ -419,6 +400,8 @@ export function CategoriesDashboard() {
 					) : null}
 				</section>
 			</div>
+
+			{!sessionState || isLoadingCategories ? <LoadingOverlay label="Loading categories" /> : null}
 
 			{modalMode ? (
 				<CategoryFormModal
