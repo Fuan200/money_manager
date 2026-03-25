@@ -1,5 +1,5 @@
 interface AppHeaderProps {
-	activeTab: 'home' | 'accounts';
+	activeTab: 'home' | 'accounts' | 'categories';
 	onSignOut: () => void;
 }
 
@@ -23,6 +23,13 @@ export function AppHeader({ activeTab, onSignOut }: AppHeaderProps) {
 					aria-current={activeTab === 'accounts' ? 'page' : undefined}
 				>
 					Accounts
+				</a>
+				<a
+					href="/categories"
+					class={`app-tab ${activeTab === 'categories' ? 'is-active' : ''}`}
+					aria-current={activeTab === 'categories' ? 'page' : undefined}
+				>
+					Categories
 				</a>
 			</nav>
 

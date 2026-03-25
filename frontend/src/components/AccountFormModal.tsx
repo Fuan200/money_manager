@@ -15,6 +15,7 @@ interface AccountFormModalProps {
 	submitError: string;
 	onClose: () => void;
 	onSubmit: (event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>) => void | Promise<void>;
+	onDelete?: () => void | Promise<void>;
 	onFieldChange: <K extends keyof AccountFormState>(field: K, value: AccountFormState[K]) => void;
 }
 
@@ -25,6 +26,7 @@ export function AccountFormModal({
 	submitError,
 	onClose,
 	onSubmit,
+	onDelete,
 	onFieldChange,
 }: AccountFormModalProps) {
 	const isEditMode = mode === 'edit';
@@ -46,8 +48,8 @@ export function AccountFormModal({
 						</h2>
 					</div>
 
-					<button type="button" class="ghost-button" onClick={onClose}>
-						Close
+					<button type="button" class="modal-close-button" onClick={onClose} aria-label="Close modal">
+						X
 					</button>
 				</div>
 
@@ -119,6 +121,12 @@ export function AccountFormModal({
 					) : null}
 
 					<div class="form-actions">
+						{isEditMode && onDelete ? (
+							<button type="button" class="danger-button" disabled={isSubmitting} onClick={() => void onDelete()}>
+								{isSubmitting ? 'Deleting...' : 'Delete account'}
+							</button>
+						) : null}
+
 						<button type="submit" class="primary-button" disabled={isSubmitting}>
 							{isSubmitting
 								? isEditMode

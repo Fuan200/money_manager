@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
@@ -92,13 +93,26 @@ def update_account(
 
 
 @accounts.delete("/delete-account/{id}", response_model=SuccessResponse[AccountPublic])
-def delete_account(id: UUID, session: Session = Depends(get_session)):
+def delete_account(
+    id: UUID,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     account = session.get(Account, id)
 
-    if not account:
+    if not account or account.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
-    session.delete(account)
-    session.commit()
+    deleted_account = load_account_with_icon(session, account.id)
 
-    return {"success": True, "data": account}
+    try:
+        session.delete(account)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="ACCOUNT CANNOT BE DELETED",
+        ) from None
+
+    return {"success": True, "data": deleted_account}

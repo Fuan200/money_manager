@@ -231,6 +231,50 @@ export function AccountsDashboard() {
 		}
 	};
 
+	const handleAccountDelete = async () => {
+		if (!sessionState || !selectedAccountId) {
+			return;
+		}
+
+		const selectedAccount = accounts.find((account) => account.id === selectedAccountId);
+		const accountName = selectedAccount?.name ?? 'this account';
+		const shouldDelete = window.confirm(`Delete "${accountName}"? This action cannot be undone.`);
+
+		if (!shouldDelete) {
+			return;
+		}
+
+		setIsSubmitting(true);
+		setSubmitError('');
+		setSubmitSuccess('');
+
+		try {
+			const response = await fetch(`${apiBaseUrl}/accounts/delete-account/${selectedAccountId}`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${sessionState.token}`,
+				},
+			});
+
+			if (!response.ok) {
+				const errorPayload = (await response.json().catch(() => null)) as
+					| { error?: string; detail?: string }
+					| null;
+				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to delete account.';
+				throw new Error(backendError);
+			}
+
+			const payload = (await response.json()) as AccountApiResponse;
+			setSubmitSuccess(`Account "${payload.data.name}" deleted successfully.`);
+			closeModal();
+			await loadAccounts(sessionState.token);
+		} catch (error) {
+			setSubmitError(error instanceof Error ? error.message : 'Unable to delete account.');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	if (!sessionState) {
 		return (
 			<section class="app-shell">
@@ -342,6 +386,7 @@ export function AccountsDashboard() {
 					submitError={submitError}
 					onClose={closeModal}
 					onSubmit={handleAccountSubmit}
+					onDelete={modalMode === 'edit' ? handleAccountDelete : undefined}
 					onFieldChange={updateField}
 				/>
 			) : null}

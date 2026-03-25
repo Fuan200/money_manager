@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Generic, Optional, TypeVar
-from pydantic import BaseModel, ConfigDict, EmailStr
-from decimal import Decimal
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 T = TypeVar("T")
@@ -15,6 +14,15 @@ class CategoryPublic(BaseModel):
 
     name: str
     type: bool
+    icon: Optional["CategoryIconPublic"] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CategoryIconPublic(BaseModel):
+    id: UUID
+    label: str
+    url: str
 
     model_config = ConfigDict(from_attributes=True)
 
