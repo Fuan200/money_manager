@@ -64,10 +64,15 @@ def create_account(account_data: CreateAccount, session: Session = Depends(get_s
 
 
 @accounts.patch("/update-account/{id}", response_model=SuccessResponse[AccountPublic])
-def update_account(id: UUID, account_data: UpdateAccount, session = Depends(get_session)):
+def update_account(
+    id: UUID,
+    account_data: UpdateAccount,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     account = session.get(Account, id)
 
-    if not account:
+    if not account or account.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
     if account_data.icon_id:

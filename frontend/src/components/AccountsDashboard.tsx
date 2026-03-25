@@ -1,18 +1,12 @@
+import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
+import { AccountFormModal, type AccountFormState } from './AccountFormModal';
 import { AppHeader } from './AppHeader';
 
 interface SessionState {
 	email: string;
 	token: string;
-}
-
-interface CreateAccountState {
-	name: string;
-	balance: string;
-	balanceInclude: boolean;
-	saving: boolean;
-	iconId: string;
 }
 
 interface AccountApiResponse {
@@ -49,11 +43,12 @@ export function AccountsDashboard() {
 	const [accounts, setAccounts] = useState<UserAccount[]>([]);
 	const [isLoadingAccounts, setIsLoadingAccounts] = useState<boolean>(true);
 	const [accountsError, setAccountsError] = useState<string>('');
-	const [isCreateFormOpen, setIsCreateFormOpen] = useState<boolean>(false);
+	const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
+	const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const [submitError, setSubmitError] = useState<string>('');
 	const [submitSuccess, setSubmitSuccess] = useState<string>('');
-	const [formState, setFormState] = useState<CreateAccountState>({
+	const [formState, setFormState] = useState<AccountFormState>({
 		name: '',
 		balance: '',
 		balanceInclude: true,
@@ -84,9 +79,9 @@ export function AccountsDashboard() {
 		window.location.replace('/');
 	};
 
-	const updateField = <K extends keyof CreateAccountState>(
+	const updateField = <K extends keyof AccountFormState>(
 		field: K,
-		value: CreateAccountState[K],
+		value: AccountFormState[K],
 	) => {
 		setFormState((currentState) => ({
 			...currentState,
@@ -102,6 +97,34 @@ export function AccountsDashboard() {
 			saving: false,
 			iconId: '',
 		});
+	};
+
+	const closeModal = () => {
+		setModalMode(null);
+		setSelectedAccountId(null);
+		setSubmitError('');
+	};
+
+	const openCreateModal = () => {
+		resetForm();
+		setSelectedAccountId(null);
+		setSubmitError('');
+		setSubmitSuccess('');
+		setModalMode('create');
+	};
+
+	const openEditModal = (account: UserAccount) => {
+		setFormState({
+			name: account.name,
+			balance: account.balance,
+			balanceInclude: account.balance_include,
+			saving: account.saving,
+			iconId: account.icon?.id ?? '',
+		});
+		setSelectedAccountId(account.id);
+		setSubmitError('');
+		setSubmitSuccess('');
+		setModalMode('edit');
 	};
 
 	const loadAccounts = async (token: string) => {
@@ -132,7 +155,9 @@ export function AccountsDashboard() {
 		}
 	};
 
-	const handleCreateAccount = async (event: Event) => {
+	const handleAccountSubmit = async (
+		event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>,
+	) => {
 		event.preventDefault();
 
 		if (!sessionState) {
@@ -155,8 +180,13 @@ export function AccountsDashboard() {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(`${apiBaseUrl}/accounts/create-account`, {
-				method: 'POST',
+			const isEditMode = modalMode === 'edit' && selectedAccountId;
+			const response = await fetch(
+				isEditMode
+					? `${apiBaseUrl}/accounts/update-account/${selectedAccountId}`
+					: `${apiBaseUrl}/accounts/create-account`,
+				{
+				method: isEditMode ? 'PATCH' : 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${sessionState.token}`,
@@ -168,7 +198,8 @@ export function AccountsDashboard() {
 					saving: formState.saving,
 					icon_id: formState.iconId.trim() || null,
 				}),
-			});
+				},
+			);
 
 			if (!response.ok) {
 				const errorPayload = (await response.json().catch(() => null)) as
@@ -179,12 +210,22 @@ export function AccountsDashboard() {
 			}
 
 			const payload = (await response.json()) as AccountApiResponse;
-			setSubmitSuccess(`Account "${payload.data.name}" created successfully.`);
+			setSubmitSuccess(
+				modalMode === 'edit'
+					? `Account "${payload.data.name}" updated successfully.`
+					: `Account "${payload.data.name}" created successfully.`,
+			);
 			resetForm();
-			setIsCreateFormOpen(false);
+			closeModal();
 			await loadAccounts(sessionState.token);
 		} catch (error) {
-			setSubmitError(error instanceof Error ? error.message : 'Unable to create account.');
+			setSubmitError(
+				error instanceof Error
+					? error.message
+					: modalMode === 'edit'
+						? 'Unable to update account.'
+						: 'Unable to create account.',
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -211,11 +252,7 @@ export function AccountsDashboard() {
 				<button
 					type="button"
 					class="primary-button"
-					onClick={() => {
-						setIsCreateFormOpen(true);
-						setSubmitError('');
-						setSubmitSuccess('');
-					}}
+					onClick={openCreateModal}
 				>
 					New account
 				</button>
@@ -258,7 +295,12 @@ export function AccountsDashboard() {
 					{!isLoadingAccounts && accounts.length > 0 ? (
 						<div class="accounts-stack">
 							{accounts.map((account) => (
-								<article class="account-row-card" key={account.id}>
+								<button
+									type="button"
+									class="account-row-card"
+									key={account.id}
+									onClick={() => openEditModal(account)}
+								>
 									<div class="account-leading">
 										<div class="account-icon-wrap" aria-hidden="true">
 											{account.icon?.url ? (
@@ -285,115 +327,23 @@ export function AccountsDashboard() {
 									</div>
 
 									<p class="account-balance">${account.balance}</p>
-								</article>
+								</button>
 							))}
 						</div>
 					) : null}
 				</section>
 			</div>
 
-			{isCreateFormOpen ? (
-				<div class="modal-backdrop" onClick={() => setIsCreateFormOpen(false)}>
-					<section
-						class="modal-card account-form-card"
-						role="dialog"
-						aria-modal="true"
-						aria-labelledby="create-account-title"
-						onClick={(event) => event.stopPropagation()}
-					>
-						<div class="modal-header">
-							<div class="form-card-header">
-								<p class="panel-label">Create account</p>
-								<h2 id="create-account-title">Enter the backend account fields</h2>
-							</div>
-
-							<button
-								type="button"
-								class="ghost-button"
-								onClick={() => setIsCreateFormOpen(false)}
-							>
-								Close
-							</button>
-						</div>
-
-						<form class="account-form" onSubmit={handleCreateAccount}>
-							<label class="field">
-								<span>Name</span>
-								<input
-									type="text"
-									name="name"
-									value={formState.name}
-									onInput={(event) => updateField('name', event.currentTarget.value)}
-									placeholder="Main checking"
-									required
-								/>
-							</label>
-
-							<label class="field">
-								<span>Balance</span>
-								<input
-									type="number"
-									name="balance"
-									value={formState.balance}
-									onInput={(event) => updateField('balance', event.currentTarget.value)}
-									placeholder="0.00"
-									step="0.01"
-									required
-								/>
-							</label>
-
-							{/* <label class="field">
-								<span>Icon ID</span>
-								<input
-									type="text"
-									name="iconId"
-									value={formState.iconId}
-									onInput={(event) => updateField('iconId', event.currentTarget.value)}
-									placeholder="Optional UUID"
-								/>
-							</label> */}
-
-							<label class="checkbox-field">
-								<input
-									type="checkbox"
-									name="balanceInclude"
-									checked={formState.balanceInclude}
-									onInput={(event) =>
-										updateField('balanceInclude', event.currentTarget.checked)}
-								/>
-								<div>
-									<span>Include balance in totals</span>
-									<p class="field-help">Maps to `balance_include` in the backend schema.</p>
-								</div>
-							</label>
-
-							{/* <label class="checkbox-field">
-								<input
-									type="checkbox"
-									name="saving"
-									checked={formState.saving}
-									onInput={(event) => updateField('saving', event.currentTarget.checked)}
-								/>
-								<div>
-									<span>Savings account</span>
-									<p class="field-help">Maps to `saving` in the backend schema.</p>
-								</div>
-							</label> */}
-
-							{submitError ? (
-								<p class="error-banner" role="alert">
-									{submitError}
-								</p>
-							) : null}
-
-							<div class="form-actions">
-								<button type="submit" class="primary-button" disabled={isSubmitting}>
-									{isSubmitting ? 'Creating...' : 'Create account'}
-								</button>
-							</div>
-						</form>
-					</section>
-				</div>
+			{modalMode ? (
+				<AccountFormModal
+					mode={modalMode}
+					formState={formState}
+					isSubmitting={isSubmitting}
+					submitError={submitError}
+					onClose={closeModal}
+					onSubmit={handleAccountSubmit}
+					onFieldChange={updateField}
+				/>
 			) : null}
 		</section>
 	);

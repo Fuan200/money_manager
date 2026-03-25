@@ -445,12 +445,25 @@ button,
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	width: 100%;
 	gap: 1rem;
 	padding: 1rem 1.2rem;
 	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
 	border-radius: var(--radius-lg);
 	background: var(--color-surface-strong);
 	box-shadow: var(--shadow-soft);
+	text-align: left;
+	transition:
+		border-color var(--transition-standard),
+		transform var(--transition-standard),
+		box-shadow var(--transition-standard);
+}
+
+.account-row-card:hover,
+.account-row-card:focus-visible {
+	border-color: rgba(var(--color-pearl-aqua-rgb), 0.32);
+	box-shadow: var(--shadow-elevated);
+	transform: translateY(-1px);
 }
 
 .account-leading {
