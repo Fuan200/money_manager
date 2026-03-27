@@ -1,88 +1,86 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session, select
 from uuid import UUID
 from typing import List
 
 from core.database import get_session
 from routes.users import get_current_user
-from models import Account, Icon, User
+from models import Account, User, Transaction,Category
 
-from schema.account import AccountPublic, CreateAccount, UpdateAccount, SuccessResponse
+from schema.transaction import CreateTransaction, UpdateTransaction, TransactionPublic, SuccessResponse
 
-accounts = APIRouter(prefix="/accounts", tags=["accounts"])
+transactions = APIRouter(prefix="/transactions", tags=["transactions"])
 
-
-@accounts.get("/get-all-accounts-by-user", response_model=SuccessResponse[List[AccountPublic]])
-def get_accounts(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    statement = select(Account).where(Account.user_id == current_user.id).order_by(Account.created_at.desc())
-    accounts = session.exec(statement).all()
-    return {"success": True, "data": accounts}
-
-
-@accounts.get("/get-account-by-id/{id}", response_model=SuccessResponse[AccountPublic])
-def get_account(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    account = session.get(Account, id)
-
-    if not account or account.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
-
-    return {"success": True, "data": account}
+@transactions.get("/get-all-transactions-by-user", response_model=SuccessResponse[List[TransactionPublic]])
+def get_transactions(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    statement = select(Transaction).where(Transaction.user_id == current_user.id).order_by(Transaction.transaction_date.desc())
+    transactions = session.exec(statement).all()
+    return {"success": True, "data": transactions}
 
 
-@accounts.post("/create-account", response_model=SuccessResponse[AccountPublic])
-def create_account(account_data: CreateAccount, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    if account_data.icon_id:
-        icon = session.get(Icon, account_data.icon_id)
-        if not icon:
-            raise HTTPException(status_code=404, detail="ICON NOT FOUND")
+@transactions.post("/create-transaction", response_model=SuccessResponse[TransactionPublic])
+def create_transaction(transaction_data: CreateTransaction, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    account = session.get(Account, transaction_data.account_id)
 
-    account = Account(
-        name=account_data.name,
-        balance=account_data.balance,
-        balance_include=account_data.balance_include if account_data.balance_include is not None else True,
-        saving=account_data.saving if account_data.saving is not None else False,
+    if not account:
+        raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+    
+    category = session.get(Category, transaction_data.category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+    
+    transaction = Transaction(
+        amount=transaction_data.amount,
+        description=transaction_data.description,
+        type=transaction_data.type if transaction_data.type is not None else False,
+        external_expense=transaction_data.external_expense if transaction_data.external_expense is not None else False,
+        transaction_date=transaction_data.transaction_date,
+        account_id=transaction_data.account_id,
+        category_id=transaction_data.category_id,
         user_id=current_user.id,
-        icon_id=account_data.icon_id,
     )
-
-    session.add(account)
+    session.add(transaction)
     session.commit()
-    session.refresh(account)
+    session.refresh(transaction)
+    
+    return {"success": True, "data": transaction}
 
-    return {"success": True, "data": account}
+@transactions.patch("/update-transactions/{id}", response_model=SuccessResponse[TransactionPublic])
+def update_transaction(id: UUID, transaction_data: UpdateTransaction, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    transaction = session.get(Transaction, id)
 
-
-@accounts.patch("/update-account/{id}", response_model=SuccessResponse[AccountPublic])
-def update_account(id: UUID, account_data: UpdateAccount, session=Depends(get_session)):
-    account = session.get(Account, id)
-
-    if not account:
-        raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
-
-    if account_data.icon_id:
-        icon = session.get(Icon, account_data.icon_id)
-        if not icon:
-            raise HTTPException(status_code=404, detail="ICON NOT FOUND")
-
-    update_data = account_data.model_dump(exclude_unset=True)
+    if not transaction or transaction.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="TRANSACTION_NOT_FOUND")
+    
+    if transaction_data.account_id:
+        account = session.get(Account, transaction_data.account_id)
+        if not account:
+            raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+        
+    if transaction_data.category_id:
+        category = session.get(Category, transaction_data.category_id)
+        if not category:
+            raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+        
+    update_data = transaction_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(account, key, value)
+        setattr(transaction, key, value)
 
-    session.add(account)
+    session.add(transaction)
     session.commit()
-    session.refresh(account)
+    session.refresh(transaction)
 
-    return {"success": True, "data": account}
+    return {"success": True, "data": transaction}
 
 
-@accounts.delete("/delete-account/{id}", response_model=SuccessResponse[AccountPublic])
-def delete_user(id: UUID, session: Session = Depends(get_session)):
-    account = session.get(Account, id)
+@transactions.delete("/delete-transactions/{id}", response_model=SuccessResponse[TransactionPublic])
+def delete_transaction(id: UUID, session: Session = Depends(get_session),current_user: User = Depends(get_current_user)):
+    transaction = session.get(Transaction, id)
 
-    if not account:
-        raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
-
-    session.delete(account)
+    if not transaction or transaction.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="TRANSACTION NOT FOUND")
+    
+    session.delete(transaction)
     session.commit()
 
-    return {"success": True, "data": account}
+    return {"success": True, "data": transaction}
