@@ -1,0 +1,10 @@
+---
+import { HomeDashboard } from '../components/HomeDashboard';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Money Manager | Home">
+	<main class="home-page">
+		<HomeDashboard client:load />
+	</main>
+</Layout>
