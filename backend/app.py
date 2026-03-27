@@ -6,6 +6,7 @@ from routes.users import users
 from routes.accounts import accounts
 from routes.categories import categories
 from routes.transfers import transfers
+from routes.transactions import transactions
 
 app = FastAPI()
 
@@ -33,3 +34,4 @@ app.include_router(users)
 app.include_router(accounts)
 app.include_router(categories)
 app.include_router(transfers)
+app.include_router(transactions)
