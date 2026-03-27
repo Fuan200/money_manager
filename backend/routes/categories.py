@@ -1,39 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 from uuid import UUID
 from typing import List
 
 from core.database import get_session
 from routes.users import get_current_user
-from models import Icon, User, Category
+from models import Account, Icon, User, Category
 
 from schema.category import CategoryPublic, CreateCategory, UpdateCategory, SuccessResponse
 
 categories = APIRouter(prefix="/categories", tags=["categories"])
 
 
-def load_category_with_icon(session: Session, category_id: UUID) -> Category | None:
-    statement = select(Category).options(selectinload(Category.icon)).where(Category.id == category_id)
-    return session.exec(statement).first()
-
-
 @categories.get("/get-all-categories-by-user", response_model=SuccessResponse[List[CategoryPublic]])
 def get_categories(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    statement = (
-        select(Category)
-        .options(selectinload(Category.icon))
-        .where(Category.user_id == current_user.id)
-        .order_by(Category.created_at.desc())
-    )
+    statement = select(Category).where(Category.user_id == current_user.id).order_by(Category.created_at.desc())
     categories = session.exec(statement).all()
     return {"success": True, "data": categories}
 
 
 @categories.get("/get-category-by-id/{id}", response_model=SuccessResponse[CategoryPublic])
 def get_category(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    category = load_category_with_icon(session, id)
+    category = session.get(Category, id)
 
     if not category or category.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
@@ -57,21 +45,16 @@ def create_category(category_data: CreateCategory, session: Session = Depends(ge
 
     session.add(category)
     session.commit()
-    created_category = load_category_with_icon(session, category.id)
+    session.refresh(category)
 
-    return {"success": True, "data": created_category}
+    return {"sucess": True, "data": category}
 
 
 @categories.patch("/update-category/{id}", response_model=SuccessResponse[CategoryPublic])
-def update_category(
-    id: UUID,
-    category_data: UpdateCategory,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
+def update_category(id: UUID, category_data: UpdateCategory, session=Depends(get_session)):
     category = session.get(Category, id)
 
-    if not category or category.user_id != current_user.id:
+    if not category:
         raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
 
     if category_data.icon_id:
@@ -85,29 +68,19 @@ def update_category(
 
     session.add(category)
     session.commit()
-    updated_category = load_category_with_icon(session, category.id)
+    session.refresh(category)
 
-    return {"success": True, "data": updated_category}
+    return {"success": True, "data": category}
 
 
 @categories.delete("/delete-category/{id}", response_model=SuccessResponse[CategoryPublic])
-def delete_category(
-    id: UUID,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
-):
+def delete_category(id: UUID, session: Session = Depends(get_session)):
     category = session.get(Category, id)
 
-    if not category or category.user_id != current_user.id:
+    if not category:
         raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
 
-    deleted_category = load_category_with_icon(session, category.id)
+    session.delete(category)
+    session.commit()
 
-    try:
-        session.delete(category)
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        raise HTTPException(status_code=409, detail="CATEGORY CANNOT BE DELETED") from None
-
-    return {"success": True, "data": deleted_category}
+    return {"success": True, "data": category}

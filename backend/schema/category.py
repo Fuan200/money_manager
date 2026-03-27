@@ -14,15 +14,6 @@ class CategoryPublic(BaseModel):
 
     name: str
     type: bool
-    icon: Optional["CategoryIconPublic"] = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class CategoryIconPublic(BaseModel):
-    id: UUID
-    label: str
-    url: str
 
     model_config = ConfigDict(from_attributes=True)
 
