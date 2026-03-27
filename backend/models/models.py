@@ -50,6 +50,7 @@ class Account(SQLModel, table=True):
     balance: Decimal = Field(sa_column=Column(Numeric(18, 2), nullable=False))
     balance_include: bool = Field(default=True, nullable=False)
     saving: bool = Field(default=False, nullable=False)
+    is_debit: bool = Field(nullable=False) # 0 False (is_not_debit) / 1 True (is_debit)
 
     user_id: UUID = Field(foreign_key="user.id")
     icon_id: Optional[UUID] = Field(default=None, foreign_key="icon.id")
