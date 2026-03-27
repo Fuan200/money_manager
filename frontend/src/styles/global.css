@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
 	color-scheme: dark;
-	font-family: 'Geist', 'Geist Sans', 'Segoe UI', 'Aptos', sans-serif;
+	font-family: 'JetBrains Mono', monospace;
 
 	/* Palette derived from src/assets/palette.txt */
 	--color-onyx: #131515;
@@ -67,9 +67,9 @@ body {
 	min-width: 320px;
 	min-height: 100vh;
 	margin: 0;
-	background:
+	/* background:
 		radial-gradient(circle at top left, rgba(var(--color-pearl-aqua-rgb), 0.14), transparent 28%),
-		linear-gradient(145deg, var(--color-bg) 0%, var(--color-surface) 48%, var(--color-bg) 100%);
+		linear-gradient(145deg, var(--color-bg) 0%, var(--color-surface) 48%, var(--color-bg) 100%); */
 	color: var(--color-text);
 	font-family: inherit;
 	line-height: 1.5;

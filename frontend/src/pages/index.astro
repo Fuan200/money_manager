@@ -11,10 +11,10 @@ import Layout from '../layouts/Layout.astro';
 
 <style>
 	:global(body) {
-		background:
+		/* background:
 			radial-gradient(circle at top left, rgba(var(--color-pearl-aqua-rgb), 0.18), transparent 30%),
 			radial-gradient(circle at bottom right, rgba(var(--color-verdigris-rgb), 0.16), transparent 28%),
-			linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface) 55%, var(--color-bg) 100%);
+			linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface) 55%, var(--color-bg) 100%); */
 	}
 
 	:global(.login-card) {
@@ -22,15 +22,15 @@ import Layout from '../layouts/Layout.astro';
 		z-index: 1;
 		width: min(100%, 28rem);
 		padding: 2rem;
-		border: 1px solid var(--color-border);
+		border: 3px solid var(--color-graphite);
 		border-radius: var(--radius-xl);
-		background:
+		/* background:
 			linear-gradient(180deg, rgba(var(--color-graphite-rgb), 0.96), rgba(var(--color-onyx-rgb), 0.94))
 				padding-box,
 			linear-gradient(180deg, var(--color-border-strong), var(--color-accent-wash)) border-box;
 		box-shadow:
 			var(--shadow-elevated),
-			inset 0 1px 0 rgba(var(--color-snow-rgb), 0.04);
+			inset 0 1px 0 rgba(var(--color-snow-rgb), 0.04); */
 		backdrop-filter: blur(16px);
 	}
 
@@ -191,31 +191,6 @@ import Layout from '../layouts/Layout.astro';
 		padding: clamp(1.5rem, 4vw, 4rem);
 		box-sizing: border-box;
 		overflow: hidden;
-	}
-
-	.login-page::before,
-	.login-page::after {
-		content: '';
-		position: absolute;
-		border-radius: 999px;
-		pointer-events: none;
-		filter: blur(8px);
-	}
-
-	.login-page::before {
-		top: 10%;
-		right: 18%;
-		width: 14rem;
-		height: 14rem;
-		background: rgba(var(--color-pearl-aqua-rgb), 0.12);
-	}
-
-	.login-page::after {
-		bottom: 8%;
-		left: 8%;
-		width: 18rem;
-		height: 18rem;
-		background: rgba(var(--color-verdigris-rgb), 0.14);
 	}
 
 	.hero-copy {
