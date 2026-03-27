@@ -1,6 +1,7 @@
 import os
 import jwt
 
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from fastapi import HTTPException
@@ -21,6 +22,7 @@ def verify_password(plain_password, hashed_password):
 
 def create_jwt_token(payload: dict):
     """Creates a JWT token with the given payload."""
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(hours=24)
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
 
