@@ -18,6 +18,7 @@ interface AccountApiResponse {
 		balance: string;
 		balance_include: boolean;
 		saving: boolean;
+		is_debit: boolean;
 	};
 }
 
@@ -27,6 +28,7 @@ interface UserAccount {
 	balance: string;
 	balance_include: boolean;
 	saving: boolean;
+	is_debit: boolean;
 	icon: {
 		id: string;
 		label: string;
@@ -57,6 +59,7 @@ export function AccountsDashboard() {
 		balance: '',
 		balanceInclude: true,
 		saving: false,
+		isDebit: true,
 		iconId: '',
 	});
 
@@ -95,6 +98,7 @@ export function AccountsDashboard() {
 			balance: '',
 			balanceInclude: true,
 			saving: false,
+			isDebit: true,
 			iconId: '',
 		});
 	};
@@ -119,6 +123,7 @@ export function AccountsDashboard() {
 			balance: account.balance,
 			balanceInclude: account.balance_include,
 			saving: account.saving,
+			isDebit: account.is_debit,
 			iconId: account.icon?.id ?? '',
 		});
 		setSelectedAccountId(account.id);
@@ -196,6 +201,7 @@ export function AccountsDashboard() {
 					balance: formState.balance.trim(),
 					balance_include: formState.balanceInclude,
 					saving: formState.saving,
+					is_debit: formState.isDebit,
 					icon_id: formState.iconId.trim() || null,
 				}),
 				},
@@ -339,7 +345,8 @@ export function AccountsDashboard() {
 										<div class="account-copy">
 											<h3>{account.name}</h3>
 											<p class="account-meta">
-												{account.saving ? 'Savings' : 'Standard'}
+												{account.is_debit ? 'Debit' : 'Credit'}
+												{account.saving ? ' | Savings' : ' | Standard'}
 												{account.balance_include ? ' | Included in totals' : ' | Excluded from totals'}
 											</p>
 										</div>

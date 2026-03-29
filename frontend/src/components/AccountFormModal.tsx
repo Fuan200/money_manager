@@ -5,6 +5,7 @@ export interface AccountFormState {
 	balance: string;
 	balanceInclude: boolean;
 	saving: boolean;
+	isDebit: boolean;
 	iconId: string;
 }
 
@@ -78,6 +79,33 @@ export function AccountFormModal({
 							required
 						/>
 					</label>
+
+					<div class="field">
+						<span>Account type</span>
+						<div class="option-toggle" role="tablist" aria-label="Account type">
+							<button
+								type="button"
+								role="tab"
+								aria-selected={formState.isDebit}
+								class={`option-toggle-button ${formState.isDebit ? 'is-active' : ''}`}
+								onClick={() => onFieldChange('isDebit', true)}
+							>
+								Debit
+							</button>
+							<button
+								type="button"
+								role="tab"
+								aria-selected={!formState.isDebit}
+								class={`option-toggle-button ${!formState.isDebit ? 'is-active' : ''}`}
+								onClick={() => onFieldChange('isDebit', false)}
+							>
+								Credit
+							</button>
+						</div>
+						<p class="field-help">
+							Debit accounts add to your available money. Credit accounts track money you owe.
+						</p>
+					</div>
 
 					{/* <label class="field">
 						<span>Icon ID</span>

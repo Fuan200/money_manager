@@ -32,6 +32,7 @@ This is a repository that contains the **Money Manager** app.
 - Use dependency injection (Depends).
 - Always handle errors with HTTPException.
 - Use snake_case for variables and functions.
+- Do not modify any backend file if the necesary endpoint is missing or incomplete just notifi me but do not alter any backend file.
 
 ### Frontend (Preact + Astro)
 - Use TypeScript strictly.
