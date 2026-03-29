@@ -40,6 +40,11 @@ class UpdateAccount(BaseModel):
     icon_id: Optional[UUID] = None
 
 
+class AccountsTotal(BaseModel):
+    total_debit: Decimal
+    total_credit: Decimal
+
+
 class SuccessResponse(BaseModel, Generic[T]):
     success: bool = True
     data: T

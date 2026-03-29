@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlmodel import Session, select
 from uuid import UUID
+from decimal import Decimal
 from typing import List
 
 from core.database import get_session
 from routes.users import get_current_user
 from models import Account, Icon, User
 
-from schema.account import AccountPublic, CreateAccount, UpdateAccount, SuccessResponse
+from schema.account import AccountPublic, CreateAccount, UpdateAccount, AccountsTotal, SuccessResponse
 
 accounts = APIRouter(prefix="/accounts", tags=["accounts"])
 
@@ -27,6 +29,20 @@ def get_account(id: UUID, session: Session = Depends(get_session), current_user:
         raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
     return {"success": True, "data": account}
+
+
+@accounts.get("/get-accounts-total", response_model=SuccessResponse[AccountsTotal])
+def get_accounts_total(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    statement_debit = select(func.sum(Account.balance)).where(
+        Account.user_id == current_user.id, Account.balance_include == True, Account.is_debit == True
+    )
+    statement_credit = select(func.sum(Account.balance)).where(
+        Account.user_id == current_user.id, Account.balance_include == True, Account.is_debit == False
+    )
+
+    total_debit = session.exec(statement_debit).one() or Decimal(0)
+    total_credit = session.exec(statement_credit).one() or Decimal(0)
+    return {"success": True, "data": {"total_debit": total_debit, "total_credit": total_credit}}
 
 
 @accounts.post("/create-account", response_model=SuccessResponse[AccountPublic])
