@@ -41,10 +41,8 @@ interface CategoriesListResponse {
 }
 
 export function CategoriesDashboard() {
-	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
-		const session = readAuthSession();
-		return session ? { email: session.email, token: session.token } : null;
-	});
+	const [sessionState, setSessionState] = useState<SessionState | null>(null);
+	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [categories, setCategories] = useState<UserCategory[]>([]);
 	const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(true);
 	const [categoriesError, setCategoriesError] = useState<string>('');
@@ -62,10 +60,20 @@ export function CategoriesDashboard() {
 	const incomeCategories = categories.filter((category) => category.type);
 
 	useEffect(() => {
+		const session = readAuthSession();
+		setSessionState(session ? { email: session.email, token: session.token } : null);
+		setHasCheckedSession(true);
+	}, []);
+
+	useEffect(() => {
+		if (!hasCheckedSession || sessionState) {
+			return;
+		}
+
 		if (!sessionState) {
 			window.location.replace('/');
 		}
-	}, [sessionState]);
+	}, [hasCheckedSession, sessionState]);
 
 	useEffect(() => {
 		if (!sessionState) {
@@ -395,7 +403,7 @@ export function CategoriesDashboard() {
 				</section>
 			</div>
 
-			{!sessionState || isLoadingCategories ? <LoadingOverlay label="Loading categories" /> : null}
+			{!hasCheckedSession || !sessionState || isLoadingCategories ? <LoadingOverlay label="Loading categories" /> : null}
 
 			{modalMode ? (
 				<CategoryFormModal

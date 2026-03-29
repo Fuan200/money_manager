@@ -42,10 +42,8 @@ interface AccountsListResponse {
 }
 
 export function AccountsDashboard() {
-	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
-		const session = readAuthSession();
-		return session ? { email: session.email, token: session.token } : null;
-	});
+	const [sessionState, setSessionState] = useState<SessionState | null>(null);
+	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<UserAccount[]>([]);
 	const [isLoadingAccounts, setIsLoadingAccounts] = useState<boolean>(true);
 	const [accountsError, setAccountsError] = useState<string>('');
@@ -64,10 +62,20 @@ export function AccountsDashboard() {
 	});
 
 	useEffect(() => {
+		const session = readAuthSession();
+		setSessionState(session ? { email: session.email, token: session.token } : null);
+		setHasCheckedSession(true);
+	}, []);
+
+	useEffect(() => {
+		if (!hasCheckedSession || sessionState) {
+			return;
+		}
+
 		if (!sessionState) {
 			window.location.replace('/');
 		}
-	}, [sessionState]);
+	}, [hasCheckedSession, sessionState]);
 
 	useEffect(() => {
 		if (!sessionState) {
@@ -360,7 +368,7 @@ export function AccountsDashboard() {
 				</section>
 			</div>
 
-			{!sessionState || isLoadingAccounts ? <LoadingOverlay label="Loading accounts" /> : null}
+			{!hasCheckedSession || !sessionState || isLoadingAccounts ? <LoadingOverlay label="Loading accounts" /> : null}
 
 			{modalMode ? (
 				<AccountFormModal

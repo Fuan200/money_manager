@@ -33,10 +33,8 @@ interface UserTransaction {
 }
 
 export function HomeDashboard() {
-	const [sessionState, setSessionState] = useState<SessionState | null>(() => {
-		const session = readAuthSession();
-		return session ? { email: session.email, token: session.token } : null;
-	});
+	const [sessionState, setSessionState] = useState<SessionState | null>(null);
+	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<SelectItem[]>([]);
 	const [categories, setCategories] = useState<SelectItem[]>([]);
 	const [transactions, setTransactions] = useState<UserTransaction[]>([]);
@@ -55,10 +53,20 @@ export function HomeDashboard() {
 	});
 
 	useEffect(() => {
+		const session = readAuthSession();
+		setSessionState(session ? { email: session.email, token: session.token } : null);
+		setHasCheckedSession(true);
+	}, []);
+
+	useEffect(() => {
+		if (!hasCheckedSession || sessionState) {
+			return;
+		}
+
 		if (!sessionState) {
 			window.location.replace('/');
 		}
-	}, [sessionState]);
+	}, [hasCheckedSession, sessionState]);
 
 	useEffect(() => {
 		if (!sessionState) {
@@ -307,7 +315,7 @@ export function HomeDashboard() {
 				) : null}
 			</div>
 
-			{!sessionState || isLoadingOptions ? <LoadingOverlay label="Loading home" /> : null}
+			{!hasCheckedSession || !sessionState || isLoadingOptions ? <LoadingOverlay label="Loading home" /> : null}
 
 			{isTransactionModalOpen ? (
 				<TransactionFormModal
