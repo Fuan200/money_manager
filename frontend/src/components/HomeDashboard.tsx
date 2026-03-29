@@ -26,17 +26,10 @@ interface UserTransaction {
 	amount: string;
 	description: string;
 	type: boolean;
+	external_expense: boolean;
 	transaction_date: string;
-	category: {
-		id: string;
-		name: string;
-		type: boolean;
-		icon: {
-			id: string;
-			label: string;
-			url: string;
-		} | null;
-	};
+	account_id: string;
+	category_id: string;
 }
 
 export function HomeDashboard() {
@@ -83,6 +76,8 @@ export function HomeDashboard() {
 	const expenseCategories = categories.filter((category) => !category.type);
 	const incomeCategories = categories.filter((category) => category.type);
 	const availableCategories = transactionFormState.type ? incomeCategories : expenseCategories;
+	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
+	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
 
 	const loadTransactionOptions = async (token: string) => {
 		setIsLoadingOptions(true);
@@ -271,33 +266,35 @@ export function HomeDashboard() {
 							{transactions.length > 0 ? (
 								<div class="transactions-stack">
 									{transactions.map((transaction) => (
-										<div class="transaction-row" key={transaction.id}>
-											<div class="account-leading">
-												<div class="account-icon-wrap" aria-hidden="true">
-													{transaction.category.icon?.url ? (
-														<img
-															src={transaction.category.icon.url}
-															alt=""
-															class="account-icon"
-															loading="lazy"
-														/>
-													) : (
-														<span class="account-icon-fallback">
-															{transaction.category.name.slice(0, 1).toUpperCase()}
-														</span>
-													)}
-												</div>
+										(() => {
+											const category = findCategory(transaction.category_id);
+											const account = findAccount(transaction.account_id);
+											const categoryName = category?.name ?? 'Unknown category';
+											const accountName = account?.name ?? 'Unknown account';
 
-												<div class="account-copy">
-													<h3>{transaction.category.name}</h3>
-													<p class="account-meta">{transaction.description}</p>
-												</div>
-											</div>
+											return (
+												<div class="transaction-row" key={transaction.id}>
+													<div class="account-leading">
+														<div class="account-icon-wrap" aria-hidden="true">
+															<span class="account-icon-fallback">
+																{categoryName.slice(0, 1).toUpperCase()}
+															</span>
+														</div>
 
-											<p class={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}>
-												{transaction.type ? '+' : '-'}${transaction.amount}
-											</p>
-										</div>
+														<div class="account-copy">
+															<h3>{categoryName}</h3>
+															<p class="account-meta">
+																{transaction.description} | {accountName}
+															</p>
+														</div>
+													</div>
+
+													<p class={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}>
+														{transaction.type ? '+' : '-'}${transaction.amount}
+													</p>
+												</div>
+											);
+										})()
 									))}
 								</div>
 							) : (
