@@ -1,4 +1,4 @@
-from fastapi import Request, Depends, HTTPException
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 

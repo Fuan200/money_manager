@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Generic, Optional, TypeVar
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
 from uuid import UUID
 

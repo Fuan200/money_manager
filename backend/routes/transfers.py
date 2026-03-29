@@ -6,7 +6,7 @@ from typing import List
 
 from core.database import get_session
 from routes.users import get_current_user
-from models import Transfer, Icon, User, Account
+from models import User, Account, Transfer
 
 from schema.transfer import TransferPublic, CreateTransfer, UpdateTransfer, SuccessResponse
 

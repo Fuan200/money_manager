@@ -5,7 +5,7 @@ from typing import List
 
 from core.database import get_session
 from routes.users import get_current_user
-from models import Account, Icon, User, Category
+from models import User, Icon, Category
 
 from schema.category import CategoryPublic, CreateCategory, UpdateCategory, SuccessResponse
 
