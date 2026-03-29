@@ -30,6 +30,11 @@ def hello_world():
     return "Server is running!!!"
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 app.include_router(users)
 app.include_router(accounts)
 app.include_router(categories)
