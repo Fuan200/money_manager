@@ -41,6 +41,7 @@ def create_account(account_data: CreateAccount, session: Session = Depends(get_s
         balance=account_data.balance,
         balance_include=account_data.balance_include if account_data.balance_include is not None else True,
         saving=account_data.saving if account_data.saving is not None else False,
+        is_debit=account_data.is_debit,
         user_id=current_user.id,
         icon_id=account_data.icon_id,
     )
