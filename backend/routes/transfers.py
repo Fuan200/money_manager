@@ -21,9 +21,10 @@ def get_transfers(session: Session = Depends(get_session), curren_user: User = D
 
 
 @transfers.get("/get-transfer-by-id/{id}", response_model=SuccessResponse[TransferPublic])
-def get_transfer(id: UUID, session: Session = Depends(get_session), curren_user: User = Depends(get_current_user)):
+def get_transfer(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     transfer = session.get(Transfer, id)
-    # TO DO: CHECK IF ACCOUNTS EXIST ????
+    if not transfer or transfer.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="TRANSFER_NOT_FOUND")
     return {"success": True, "data": transfer}
 
 
