@@ -76,7 +76,7 @@ def delete_transfer(id: UUID, session: Session = Depends(get_session)):
     transfer = session.get(Transfer, id)
 
     if not transfer:
-        raise HTTPException(status_code=4040, detail="TRANSFER NOT FOUND")
+        raise HTTPException(status_code=404, detail="TRANSFER NOT FOUND")
 
     session.delete(transfer)
     session.commit()
