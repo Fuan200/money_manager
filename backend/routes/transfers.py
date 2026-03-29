@@ -35,13 +35,13 @@ def create_transfer(transfer_data: CreateTransfer, session: Session = Depends(ge
 
         if not outcome_account or not income_account:
             raise HTTPException(status_code=404, detail="Outcome or Income account not found")
-        
+
         if outcome_account.user_id != current_user.id or income_account.user_id != current_user.id:
             raise HTTPException(status_code=404, detail="Outcome or Income account does not belong to user")
-        
+
         if outcome_account.balance < transfer_data.amount:
             raise HTTPException(status_code=400, detail="Insufficient balance")
-        
+
         outcome_account.balance -= transfer_data.amount
         income_account.balance += transfer_data.amount
 
@@ -66,7 +66,7 @@ def create_transfer(transfer_data: CreateTransfer, session: Session = Depends(ge
 
 
 @transfers.patch("/update-transfer/{id}", response_model=SuccessResponse[TransferPublic])
-def update_transfer(id: UUID, transfer_data: UpdateTransfer, session = Depends(get_session)):
+def update_transfer(id: UUID, transfer_data: UpdateTransfer, session=Depends(get_session)):
     pass
 
 
@@ -76,7 +76,7 @@ def delete_transfer(id: UUID, session: Session = Depends(get_session)):
 
     if not transfer:
         raise HTTPException(status_code=4040, detail="TRANSFER NOT FOUND")
-    
+
     session.delete(transfer)
     session.commit()
 

@@ -6,6 +6,7 @@ from uuid import UUID
 
 T = TypeVar("T")
 
+
 class TransactionPublic(BaseModel):
     id: UUID
 
@@ -42,6 +43,7 @@ class UpdateTransaction(BaseModel):
     transaction_date: Optional[datetime] = None
     account_id: Optional[UUID] = None
     category_id: Optional[UUID] = None
+
 
 class SuccessResponse(BaseModel, Generic[T]):
     success: bool = True

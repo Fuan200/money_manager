@@ -23,6 +23,7 @@ class TransferPublic(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CreateTransfer(BaseModel):
     amount: Decimal
     description: str
