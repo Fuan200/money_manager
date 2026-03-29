@@ -19,16 +19,26 @@ def get_transactions(session: Session = Depends(get_session), current_user: User
     return {"success": True, "data": transactions}
 
 
+@transactions.get("/get-transactions-by-id/{id}", response_model=SuccessResponse[TransactionPublic])
+def get_transactions(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    transactions = session.get(Transaction, id)
+
+    if not transactions or transactions.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="TRANSACTION NOT FOUND")
+    
+    return {"success": True, "data": transactions}
+
+
 @transactions.post("/create-transaction", response_model=SuccessResponse[TransactionPublic])
 def create_transaction(transaction_data: CreateTransaction, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     account = session.get(Account, transaction_data.account_id)
 
     if not account:
-        raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+        raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
     category = session.get(Category, transaction_data.category_id)
     if not category:
-        raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+        raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
 
     transaction = Transaction(
         amount=transaction_data.amount,
@@ -54,17 +64,17 @@ def update_transaction(
     transaction = session.get(Transaction, id)
 
     if not transaction or transaction.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="TRANSACTION_NOT_FOUND")
+        raise HTTPException(status_code=404, detail="TRANSACTION NOT FOUND")
 
     if transaction_data.account_id:
         account = session.get(Account, transaction_data.account_id)
         if not account:
-            raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+            raise HTTPException(status_code=404, detail="ACCOUNT NOT FOUND")
 
     if transaction_data.category_id:
         category = session.get(Category, transaction_data.category_id)
         if not category:
-            raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+            raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
 
     update_data = transaction_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
