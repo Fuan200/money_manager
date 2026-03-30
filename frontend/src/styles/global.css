@@ -695,6 +695,14 @@ button,
 	text-align: right;
 }
 
+.account-balance.is-debit {
+	color: var(--color-text);
+}
+
+.account-balance.is-credit {
+	color: rgba(180, 96, 96, 0.92);
+}
+
 .transactions-stack {
 	display: grid;
 	gap: 0.85rem;

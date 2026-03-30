@@ -4,6 +4,7 @@ import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AccountFormModal, type AccountFormState } from './AccountFormModal';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
+import { TotalBalanceCard } from './TotalBalanceCard';
 
 interface SessionState {
 	email: string;
@@ -41,10 +42,25 @@ interface AccountsListResponse {
 	data: UserAccount[];
 }
 
+interface AccountsTotalResponse {
+	data: {
+		total_debit: string;
+		total_credit: string;
+	};
+}
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2,
+});
+
 export function AccountsDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
 	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<UserAccount[]>([]);
+	const [totalBalance, setTotalBalance] = useState<string>(currencyFormatter.format(0));
 	const [isLoadingAccounts, setIsLoadingAccounts] = useState<boolean>(true);
 	const [accountsError, setAccountsError] = useState<string>('');
 	const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
@@ -144,23 +160,36 @@ export function AccountsDashboard() {
 		setIsLoadingAccounts(true);
 		setAccountsError('');
 
-		try {
-			const response = await fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+	try {
+			const [accountsResponse, totalsResponse] = await Promise.all([
+				fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
+				fetch(`${apiBaseUrl}/accounts/get-accounts-total`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
+			]);
 
-			if (!response.ok) {
-				const errorPayload = (await response.json().catch(() => null)) as
+			if (!accountsResponse.ok || !totalsResponse.ok) {
+				const failedResponse = accountsResponse.ok ? totalsResponse : accountsResponse;
+				const errorPayload = (await failedResponse.json().catch(() => null)) as
 					| { error?: string; detail?: string }
 					| null;
 				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to load accounts.';
 				throw new Error(backendError);
 			}
 
-			const payload = (await response.json()) as AccountsListResponse;
-			setAccounts(payload.data);
+			const accountsPayload = (await accountsResponse.json()) as AccountsListResponse;
+			const totalsPayload = (await totalsResponse.json()) as AccountsTotalResponse;
+			const totalDebit = Number.parseFloat(totalsPayload.data.total_debit ?? '0');
+			const totalCredit = Number.parseFloat(totalsPayload.data.total_credit ?? '0');
+
+			setAccounts(accountsPayload.data);
+			setTotalBalance(currencyFormatter.format(totalDebit - totalCredit));
 		} catch (error) {
 			setAccountsError(error instanceof Error ? error.message : 'Unable to load accounts.');
 		} finally {
@@ -295,6 +324,10 @@ export function AccountsDashboard() {
 
 			<div class="app-content">
 				{sessionState ? (
+					<TotalBalanceCard totalBalance={totalBalance} />
+				) : null}
+
+				{sessionState ? (
 					<button
 						type="button"
 						class="primary-button"
@@ -360,7 +393,9 @@ export function AccountsDashboard() {
 										</div>
 									</div>
 
-									<p class="account-balance">${account.balance}</p>
+									<p class={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}>
+										{account.is_debit ? `$${account.balance}` : `-$${account.balance}`}
+									</p>
 								</button>
 							))}
 						</div>
