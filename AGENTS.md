@@ -88,7 +88,6 @@ Rules:
 - Separate UI and logic.
 - Do not use gradients for colors, only solid colors.
 - When posible use the userinterface-wiki skills for a better interface
-- To represent better the update of values use the calligraph library
 
 ---
 

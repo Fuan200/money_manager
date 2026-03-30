@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
+import { currencyFormatter, formatCurrencyValue } from '../lib/currency';
+import { AnimatedAmount } from './AnimatedAmount';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
 import { TransactionFormModal, type TransactionFormState } from './TransactionFormModal';
@@ -41,13 +43,6 @@ interface AccountsTotalResponse {
 }
 
 type TransactionTab = 'expenses' | 'incomes';
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-	style: 'currency',
-	currency: 'USD',
-	minimumFractionDigits: 2,
-	maximumFractionDigits: 2,
-});
 
 export function HomeDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
@@ -354,9 +349,13 @@ export function HomeDashboard() {
 														</div>
 													</div>
 
-													<p class={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}>
-														{transaction.type ? '+' : '-'}${transaction.amount}
-													</p>
+													<AnimatedAmount
+														value={formatCurrencyValue(transaction.amount, {
+															multiplier: transaction.type ? 1 : -1,
+															positivePrefix: transaction.type ? '+' : undefined,
+														})}
+														className={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}
+													/>
 												</div>
 											);
 										})()

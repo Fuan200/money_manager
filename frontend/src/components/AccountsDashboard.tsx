@@ -1,7 +1,9 @@
 import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
+import { currencyFormatter, formatCurrencyValue } from '../lib/currency';
 import { AccountFormModal, type AccountFormState } from './AccountFormModal';
+import { AnimatedAmount } from './AnimatedAmount';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
 import { TotalBalanceCard } from './TotalBalanceCard';
@@ -48,13 +50,6 @@ interface AccountsTotalResponse {
 		total_accounts: string;
 	};
 }
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-	style: 'currency',
-	currency: 'USD',
-	minimumFractionDigits: 2,
-	maximumFractionDigits: 2,
-});
 
 export function AccountsDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
@@ -392,9 +387,12 @@ export function AccountsDashboard() {
 										</div>
 									</div>
 
-									<p class={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}>
-										{account.is_debit ? `$${account.balance}` : `-$${account.balance}`}
-									</p>
+									<AnimatedAmount
+										value={formatCurrencyValue(account.balance, {
+											multiplier: account.is_debit ? 1 : -1,
+										})}
+										className={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}
+									/>
 								</button>
 							))}
 						</div>
