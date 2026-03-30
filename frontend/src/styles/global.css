@@ -282,6 +282,237 @@ button,
 	text-align: center;
 }
 
+.expense-breakdown-card {
+	display: grid;
+	gap: 1rem;
+	max-width: 52rem;
+	margin: 0 auto;
+	background: rgba(var(--color-graphite-rgb), 0.94);
+}
+
+.expense-breakdown-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.expense-breakdown-action {
+	flex-shrink: 0;
+}
+
+.expense-breakdown-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.expense-breakdown-caption {
+	margin: 0;
+	max-width: 14rem;
+	color: var(--color-text-soft);
+	font-size: 0.92rem;
+	line-height: 1.5;
+	text-align: right;
+}
+
+.expense-breakdown-content {
+	display: grid;
+	grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 18rem);
+	align-items: center;
+	gap: 1.25rem;
+}
+
+.expense-breakdown-visual {
+	display: grid;
+	justify-items: center;
+	gap: 0.9rem;
+	align-self: center;
+	padding: 0.5rem 0;
+	text-align: center;
+}
+
+.expense-breakdown-chart-shell {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: min(18rem, 100%);
+}
+
+.expense-breakdown-donut {
+	width: 100%;
+	height: auto;
+	transform: rotate(-90deg);
+}
+
+.expense-breakdown-ring-shadow,
+.expense-breakdown-ring-track,
+.expense-breakdown-segment,
+.expense-breakdown-ring-inner {
+	fill: none;
+}
+
+.expense-breakdown-ring-shadow {
+	stroke: rgba(var(--color-onyx-rgb), 0.48);
+	stroke-width: 20;
+}
+
+.expense-breakdown-ring-track {
+	stroke: rgba(var(--color-snow-rgb), 0.08);
+	stroke-width: 18;
+}
+
+.expense-breakdown-segment {
+	stroke-width: 18;
+	stroke-linecap: butt;
+}
+
+.expense-breakdown-tone-1 {
+	stroke: var(--color-pearl-aqua);
+	background: var(--color-pearl-aqua);
+}
+
+.expense-breakdown-tone-2 {
+	stroke: var(--color-verdigris);
+	background: var(--color-verdigris);
+}
+
+.expense-breakdown-tone-3 {
+	stroke: rgba(var(--color-snow-rgb), 0.92);
+	background: rgba(var(--color-snow-rgb), 0.92);
+}
+
+.expense-breakdown-tone-4 {
+	stroke: rgba(var(--color-pearl-aqua-rgb), 0.72);
+	background: rgba(var(--color-pearl-aqua-rgb), 0.72);
+}
+
+.expense-breakdown-tone-5 {
+	stroke: rgba(var(--color-verdigris-rgb), 0.66);
+	background: rgba(var(--color-verdigris-rgb), 0.66);
+}
+
+.expense-breakdown-tone-6 {
+	stroke: rgba(var(--color-snow-rgb), 0.58);
+	background: rgba(var(--color-snow-rgb), 0.58);
+}
+
+.expense-breakdown-ring-core {
+	fill: rgba(var(--color-graphite-rgb), 0.96);
+	stroke: rgba(var(--color-pearl-aqua-rgb), 0.14);
+	stroke-width: 1.5;
+}
+
+.expense-breakdown-ring-inner {
+	stroke: rgba(var(--color-snow-rgb), 0.08);
+	stroke-width: 1.5;
+	stroke-dasharray: 2 2;
+}
+
+.expense-breakdown-total {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	gap: 0.2rem;
+	text-align: center;
+	pointer-events: none;
+}
+
+.expense-breakdown-total p,
+.expense-breakdown-total strong {
+	margin: 0;
+}
+
+.expense-breakdown-total p {
+	color: var(--color-text-soft);
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.expense-breakdown-total strong {
+	font-size: clamp(1.1rem, 2.6vw, 1.5rem);
+	font-weight: 800;
+	letter-spacing: -0.05em;
+	font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.expense-breakdown-list {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.expense-breakdown-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.85rem 1rem;
+	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+	border-radius: var(--radius-md);
+	background: rgba(var(--color-onyx-rgb), 0.28);
+}
+
+.expense-breakdown-copy {
+	min-width: 0;
+}
+
+.expense-breakdown-title {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	min-width: 0;
+}
+
+.expense-breakdown-marker {
+	flex: 0 0 auto;
+	width: 0.85rem;
+	height: 0.85rem;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.15rem rgba(var(--color-onyx-rgb), 0.4);
+}
+
+.expense-breakdown-copy h3,
+.expense-breakdown-metrics p,
+.expense-breakdown-row strong {
+	margin: 0;
+}
+
+.expense-breakdown-copy h3 {
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+.expense-breakdown-metrics {
+	display: grid;
+	justify-items: end;
+	gap: 0.18rem;
+	text-align: right;
+}
+
+.expense-breakdown-metrics p {
+	color: var(--color-text-soft);
+	font-size: 0.92rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.expense-breakdown-row strong {
+	color: var(--color-text);
+	font-size: 1rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.expense-breakdown-empty {
+	margin-top: 0;
+}
+
 .panel-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1081,6 +1312,7 @@ button,
 	align-items: center;
 	gap: 0.5rem;
 	width: fit-content;
+	max-width: 100%;
 	padding: 0.35rem;
 	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
 	border-radius: var(--radius-pill);
@@ -1239,6 +1471,48 @@ button,
 
 	.summary-card {
 		flex-direction: column;
+	}
+
+	.expense-breakdown-content {
+		grid-template-columns: 1fr;
+	}
+
+	.expense-breakdown-controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.expense-breakdown-action,
+	.transaction-tabs {
+		width: 100%;
+	}
+
+	.transaction-tabs {
+		justify-content: stretch;
+	}
+
+	.transaction-tab {
+		flex: 1 1 0;
+	}
+
+	.expense-breakdown-header,
+	.expense-breakdown-row {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.expense-breakdown-caption,
+	.expense-breakdown-metrics,
+	.expense-breakdown-row strong {
+		text-align: left;
+	}
+
+	.expense-breakdown-metrics {
+		justify-items: start;
+	}
+
+	.expense-breakdown-donut {
+		width: min(16rem, 100%);
 	}
 
 	.modal-header {

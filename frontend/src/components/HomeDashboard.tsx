@@ -3,6 +3,7 @@ import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { currencyFormatter, formatCurrencyValue } from '../lib/currency';
 import { AnimatedAmount } from './AnimatedAmount';
 import { AppHeader } from './AppHeader';
+import { CategoryExpenseChart, type CategoryExpenseShare } from './CategoryExpenseChart';
 import { LoadingOverlay } from './LoadingOverlay';
 import { TransactionFormModal, type TransactionFormState } from './TransactionFormModal';
 import { TotalBalanceCard } from './TotalBalanceCard';
@@ -116,8 +117,60 @@ export function HomeDashboard() {
 	const filteredTransactions = transactions.filter((transaction) =>
 		activeTransactionTab === 'incomes' ? transaction.type : !transaction.type,
 	);
+	const chartTransactions = filteredTransactions;
 	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
 	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
+	const categoryShares = chartTransactions.reduce<Map<string, CategoryExpenseShare>>((sharesMap, transaction) => {
+
+		const amount = Number.parseFloat(transaction.amount ?? '0');
+		const category = findCategory(transaction.category_id);
+		const existingShare = sharesMap.get(transaction.category_id);
+
+		if (existingShare) {
+			existingShare.amount += amount;
+			return sharesMap;
+		}
+
+		sharesMap.set(transaction.category_id, {
+			id: transaction.category_id,
+			name: category?.name ?? 'Unknown category',
+			amount,
+			percentage: 0,
+		});
+
+		return sharesMap;
+	}, new Map<string, CategoryExpenseShare>());
+	const chartItems = (() => {
+		const sortedShares = Array.from(categoryShares.values()).sort((left, right) => right.amount - left.amount);
+
+		if (sortedShares.length <= 5) {
+			return sortedShares;
+		}
+
+		const visibleShares = sortedShares.slice(0, 4);
+		const remainingAmount = sortedShares.slice(4).reduce((sum, item) => sum + item.amount, 0);
+
+		return [
+			...visibleShares,
+			{
+				id: `other-${activeTransactionTab}-categories`,
+				name: 'Other categories',
+				amount: remainingAmount,
+				percentage: 0,
+			},
+		];
+	})();
+	const totalChartAmount = chartItems.reduce((sum, item) => sum + item.amount, 0);
+	const categoryBreakdown = chartItems.map((item) => ({
+		...item,
+		percentage: totalChartAmount > 0 ? Number(((item.amount / totalChartAmount) * 100).toFixed(1)) : 0,
+	}));
+	const chartTitle = activeTransactionTab === 'expenses' ? 'Expense categories' : 'Income categories';
+	const chartTotalLabel = activeTransactionTab === 'expenses' ? 'Total expenses' : 'Total incomes';
+	const chartEmptyMessage =
+		activeTransactionTab === 'expenses'
+			? 'Add expense transactions to see your category distribution.'
+			: 'Add income transactions to see your category distribution.';
 	const latestUpdatedTransaction = transactions.reduce<UserTransaction | null>((latestTransaction, transaction) => {
 		if (!latestTransaction) {
 			return transaction;
@@ -387,36 +440,43 @@ export function HomeDashboard() {
 
 			<div class="app-content">
 				{sessionState ? (
-					<TotalBalanceCard totalBalance={totalBalance} />
-				) : null}
+					<>
+						<TotalBalanceCard totalBalance={totalBalance} />
+						<CategoryExpenseChart
+							items={categoryBreakdown}
+							title={chartTitle}
+							totalLabel={chartTotalLabel}
+							emptyMessage={chartEmptyMessage}
+							controls={
+								<>
+									<button type="button" class="primary-button expense-breakdown-action" onClick={openTransactionModal}>
+										New transaction
+									</button>
 
-				{sessionState ? (
-					<button type="button" class="primary-button" onClick={openTransactionModal}>
-						New transaction
-					</button>
-				) : null}
-
-				{sessionState ? (
-					<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
-						<button
-							type="button"
-							role="tab"
-							class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
-							aria-selected={activeTransactionTab === 'expenses'}
-							onClick={() => setActiveTransactionTab('expenses')}
-						>
-							Expenses
-						</button>
-						<button
-							type="button"
-							role="tab"
-							class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
-							aria-selected={activeTransactionTab === 'incomes'}
-							onClick={() => setActiveTransactionTab('incomes')}
-						>
-							Incomes
-						</button>
-					</div>
+									<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
+										<button
+											type="button"
+											role="tab"
+											class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
+											aria-selected={activeTransactionTab === 'expenses'}
+											onClick={() => setActiveTransactionTab('expenses')}
+										>
+											Expenses
+										</button>
+										<button
+											type="button"
+											role="tab"
+											class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
+											aria-selected={activeTransactionTab === 'incomes'}
+											onClick={() => setActiveTransactionTab('incomes')}
+										>
+											Incomes
+										</button>
+									</div>
+								</>
+							}
+						/>
+					</>
 				) : null}
 
 				{submitSuccess ? (

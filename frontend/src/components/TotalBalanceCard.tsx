@@ -12,7 +12,7 @@ export function TotalBalanceCard({
 	return (
 		<section class="summary-card home-total-card" aria-label={label}>
 			<div>
-				<p class="panel-label">{label}</p>
+				<h2>{label}</h2>
 				<AnimatedAmount value={totalBalance} className="summary-value" autoSize />
 			</div>
 		</section>
