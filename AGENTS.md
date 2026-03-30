@@ -86,6 +86,7 @@ Rules:
 - The aplication must be in a Dark mode style.
 - Use reusable components (buttons, inputs, cards).
 - Separate UI and logic.
+- Do not use gradients for colors, only solid colors.
 
 ---
 

@@ -32,12 +32,30 @@ interface UserTransaction {
 	category_id: string;
 }
 
+interface AccountsTotalResponse {
+	data: {
+		total_debit: string;
+		total_credit: string;
+	};
+}
+
+type TransactionTab = 'expenses' | 'incomes';
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2,
+});
+
 export function HomeDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
 	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<SelectItem[]>([]);
 	const [categories, setCategories] = useState<SelectItem[]>([]);
 	const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+	const [totalBalance, setTotalBalance] = useState<string>(currencyFormatter.format(0));
+	const [activeTransactionTab, setActiveTransactionTab] = useState<TransactionTab>('expenses');
 	const [isLoadingOptions, setIsLoadingOptions] = useState<boolean>(true);
 	const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
 	const [submitError, setSubmitError] = useState<string>('');
@@ -84,6 +102,9 @@ export function HomeDashboard() {
 	const expenseCategories = categories.filter((category) => !category.type);
 	const incomeCategories = categories.filter((category) => category.type);
 	const availableCategories = transactionFormState.type ? incomeCategories : expenseCategories;
+	const filteredTransactions = transactions.filter((transaction) =>
+		activeTransactionTab === 'incomes' ? transaction.type : !transaction.type,
+	);
 	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
 	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
 
@@ -91,7 +112,7 @@ export function HomeDashboard() {
 		setIsLoadingOptions(true);
 
 		try {
-			const [accountsResponse, categoriesResponse] = await Promise.all([
+			const [accountsResponse, categoriesResponse, totalsResponse] = await Promise.all([
 				fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -102,17 +123,26 @@ export function HomeDashboard() {
 						Authorization: `Bearer ${token}`,
 					},
 				}),
+				fetch(`${apiBaseUrl}/accounts/get-accounts-total`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
 			]);
 
-			if (!accountsResponse.ok || !categoriesResponse.ok) {
+			if (!accountsResponse.ok || !categoriesResponse.ok || !totalsResponse.ok) {
 				throw new Error('Unable to load transaction options.');
 			}
 
 			const accountsPayload = (await accountsResponse.json()) as { data: SelectItem[] };
 			const categoriesPayload = (await categoriesResponse.json()) as { data: SelectItem[] };
+			const totalsPayload = (await totalsResponse.json()) as AccountsTotalResponse;
+			const totalDebit = Number.parseFloat(totalsPayload.data.total_debit ?? '0');
+			const totalCredit = Number.parseFloat(totalsPayload.data.total_credit ?? '0');
 
 			setAccounts(accountsPayload.data);
 			setCategories(categoriesPayload.data);
+			setTotalBalance(currencyFormatter.format(totalDebit - totalCredit));
 			await loadTransactions(token);
 		} catch (error) {
 			setSubmitError(error instanceof Error ? error.message : 'Unable to load transaction options.');
@@ -243,7 +273,7 @@ export function HomeDashboard() {
 			setSubmitSuccess('Transaction created successfully.');
 			resetTransactionForm();
 			closeTransactionModal();
-			await loadTransactions(sessionState.token);
+			await loadTransactionOptions(sessionState.token);
 		} catch (error) {
 			setSubmitError(error instanceof Error ? error.message : 'Unable to create transaction.');
 		} finally {
@@ -257,9 +287,41 @@ export function HomeDashboard() {
 
 			<div class="app-content">
 				{sessionState ? (
+					<section class="summary-card home-total-card" aria-label="User total balance">
+						<div>
+							<p class="panel-label">Total balance</p>
+							<h1>{totalBalance}</h1>
+						</div>
+					</section>
+				) : null}
+
+				{sessionState ? (
 					<button type="button" class="primary-button" onClick={openTransactionModal}>
 						New transaction
 					</button>
+				) : null}
+
+				{sessionState ? (
+					<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
+						<button
+							type="button"
+							role="tab"
+							class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
+							aria-selected={activeTransactionTab === 'expenses'}
+							onClick={() => setActiveTransactionTab('expenses')}
+						>
+							Expenses
+						</button>
+						<button
+							type="button"
+							role="tab"
+							class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
+							aria-selected={activeTransactionTab === 'incomes'}
+							onClick={() => setActiveTransactionTab('incomes')}
+						>
+							Incomes
+						</button>
+					</div>
 				) : null}
 
 				{submitSuccess ? (
@@ -271,9 +333,9 @@ export function HomeDashboard() {
 				{sessionState ? (
 					<>
 						<section class="accounts-list-section">
-							{transactions.length > 0 ? (
+							{filteredTransactions.length > 0 ? (
 								<div class="transactions-stack">
-									{transactions.map((transaction) => (
+									{filteredTransactions.map((transaction) => (
 										(() => {
 											const category = findCategory(transaction.category_id);
 											const account = findAccount(transaction.account_id);
@@ -307,7 +369,9 @@ export function HomeDashboard() {
 								</div>
 							) : (
 								<div class="account-row-card">
-									<p class="panel-copy">No transactions yet.</p>
+									<p class="panel-copy">
+										No {activeTransactionTab === 'expenses' ? 'expenses' : 'incomes'} yet.
+									</p>
 								</div>
 							)}
 						</section>

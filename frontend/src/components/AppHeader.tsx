@@ -6,9 +6,6 @@ interface AppHeaderProps {
 export function AppHeader({ activeTab, onSignOut }: AppHeaderProps) {
 	return (
 		<header class="app-header">
-			<div class="app-brand">
-			</div>
-
 			<nav class="app-tabs" aria-label="Primary">
 				<a
 					href="/home"

@@ -141,7 +141,7 @@ button,
 
 .home-page {
 	min-height: 100vh;
-	padding: clamp(1.25rem, 3vw, 3rem);
+	padding: 0 clamp(1.25rem, 3vw, 3rem) clamp(1.25rem, 3vw, 3rem);
 	box-sizing: border-box;
 }
 
@@ -157,7 +157,6 @@ button,
 	gap: 1.25rem;
 }
 
-.app-header,
 .summary-card,
 .info-card {
 	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
@@ -169,10 +168,22 @@ button,
 
 .app-header {
 	display: grid;
-	grid-template-columns: minmax(0, 1.2fr) auto auto;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 1rem;
-	padding: clamp(1.1rem, 2.8vw, 1.6rem);
+	width: 100vw;
+	margin-left: calc(50% - 50vw);
+	padding:
+		clamp(1rem, 2.6vw, 1.25rem)
+		max(1.25rem, calc((100vw - 72rem) / 2 + clamp(1.25rem, 3vw, 3rem)));
+	border-top: 0;
+	border-right: 0;
+	border-bottom: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+	border-left: 0;
+	border-radius: 0;
+	background: rgba(var(--color-graphite-rgb), 0.82);
+	box-shadow: none;
+	backdrop-filter: blur(14px);
 }
 
 .app-brand h1,
@@ -188,24 +199,22 @@ button,
 }
 
 .app-tabs {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 0.45rem;
-	padding: 0.35rem;
-	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
-	border-radius: var(--radius-pill);
-	background: rgba(var(--color-onyx-rgb), 0.55);
+	gap: clamp(1rem, 2vw, 2rem);
+	justify-content: flex-start;
+	min-width: 0;
 }
 
 .app-tab {
-	padding: 0.7rem 1rem;
-	border-radius: var(--radius-pill);
+	position: relative;
+	padding: 0.2rem 0;
 	color: var(--color-text-muted);
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	font-weight: 600;
 	line-height: 1;
+	letter-spacing: 0.02em;
 	transition:
-		background-color var(--transition-standard),
 		color var(--transition-standard),
 		transform var(--transition-standard);
 }
@@ -217,9 +226,22 @@ button,
 }
 
 .app-tab.is-active {
-	background: var(--color-accent);
-	color: var(--color-bg);
-	box-shadow: 0 0.6rem 1.2rem rgba(0, 0, 0, 0.2);
+	color: var(--color-accent-strong);
+}
+
+.app-tab.is-active::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	bottom: -0.8rem;
+	left: 0;
+	height: 0.12rem;
+	border-radius: var(--radius-pill);
+	background: linear-gradient(
+		90deg,
+		rgba(var(--color-verdigris-rgb), 0.92),
+		rgba(var(--color-pearl-aqua-rgb), 0.92)
+	);
 }
 
 .summary-card {
@@ -228,6 +250,16 @@ button,
 	justify-content: space-between;
 	gap: 1rem;
 	padding: clamp(1.4rem, 3vw, 2.25rem);
+}
+
+.home-total-card {
+	background: var(--color-surface-strong);
+	justify-content: center;
+	align-items: center;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 auto;
+	text-align: center;
 }
 
 .panel-grid {
@@ -669,6 +701,40 @@ button,
 	margin-top: 1rem;
 }
 
+.transaction-tabs {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: fit-content;
+	padding: 0.35rem;
+	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+	border-radius: var(--radius-pill);
+	background: rgba(var(--color-onyx-rgb), 0.54);
+}
+
+.transaction-tab {
+	padding: 0.7rem 1rem;
+	border-radius: var(--radius-pill);
+	color: var(--color-text-muted);
+	font: inherit;
+	font-weight: 700;
+	line-height: 1;
+	transition:
+		background-color var(--transition-standard),
+		color var(--transition-standard);
+}
+
+.transaction-tab:hover,
+.transaction-tab:focus-visible {
+	background: rgba(var(--color-pearl-aqua-rgb), 0.12);
+	color: var(--color-text);
+}
+
+.transaction-tab.is-active {
+	background: var(--color-accent);
+	color: var(--color-bg);
+}
+
 .transaction-row {
 	display: flex;
 	align-items: center;
@@ -744,6 +810,9 @@ button,
 
 	.app-header {
 		grid-template-columns: 1fr;
+		justify-items: start;
+		padding-right: 1.25rem;
+		padding-left: 1.25rem;
 	}
 
 	.account-row-card {
@@ -762,16 +831,17 @@ button,
 
 @media (max-width: 640px) {
 	.home-page {
-		padding: 1.25rem;
+		padding: 0 1.25rem 1.25rem;
 	}
 
 	.app-tabs {
 		width: 100%;
-		justify-content: stretch;
+		justify-content: flex-start;
+		overflow-x: auto;
+		padding-bottom: 0.35rem;
 	}
 
 	.app-tab {
-		flex: 1;
-		text-align: center;
+		flex: 0 0 auto;
 	}
 }
