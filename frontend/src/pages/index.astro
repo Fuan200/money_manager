@@ -67,6 +67,44 @@ import Layout from '../layouts/Layout.astro';
 		gap: 1rem;
 	}
 
+	:global(.auth-toggle) {
+		display: inline-grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.35rem;
+		width: 100%;
+		margin-bottom: 1.25rem;
+		padding: 0.35rem;
+		border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+		border-radius: var(--radius-pill);
+		background: rgba(var(--color-onyx-rgb), 0.55);
+	}
+
+	:global(.auth-toggle-button) {
+		padding: 0.8rem 1rem;
+		border-radius: var(--radius-pill);
+		background: transparent;
+		color: var(--color-text-muted);
+		font: inherit;
+		font-weight: 700;
+		line-height: 1;
+		transition:
+			background-color var(--transition-standard),
+			color var(--transition-standard),
+			transform var(--transition-standard);
+	}
+
+	:global(.auth-toggle-button:hover),
+	:global(.auth-toggle-button:focus-visible) {
+		color: var(--color-text);
+		transform: translateY(-1px);
+	}
+
+	:global(.auth-toggle-button.is-active) {
+		background: var(--color-accent);
+		color: var(--color-bg);
+		box-shadow: 0 0.6rem 1.2rem rgba(var(--color-onyx-rgb), 0.24);
+	}
+
 	:global(.field) {
 		display: grid;
 		gap: 0.6rem;
