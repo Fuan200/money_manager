@@ -634,9 +634,9 @@ button,
 }
 
 .date-shortcuts {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.75rem;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.9rem;
 }
 
 .calendar-trigger-button,
@@ -658,9 +658,10 @@ button,
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	width: 7.25rem;
-	min-width: 7.25rem;
-	min-height: 4.75rem;
+	width: 100%;
+	min-width: 0;
+	min-height: 5.25rem;
+	padding: 1rem 1.1rem;
 	text-align: center;
 }
 
@@ -746,11 +747,9 @@ button,
 }
 
 .inline-calendar-title {
-	margin: 0;
-	color: var(--color-text);
-	font-size: 1rem;
-	font-weight: 700;
-	text-align: center;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 0.6rem;
 }
 
 .inline-calendar-nav {
@@ -779,6 +778,28 @@ button,
 
 .inline-calendar-nav:active {
 	transform: scale(0.98);
+}
+
+.inline-calendar-select {
+	width: 100%;
+	min-height: 2.75rem;
+	padding: 0.7rem 0.9rem;
+	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.14);
+	border-radius: var(--radius-pill);
+	background: rgba(var(--color-onyx-rgb), 0.48);
+	color: var(--color-text);
+	font-size: 0.95rem;
+	font-weight: 700;
+}
+
+.inline-calendar-select-year {
+	min-width: 6.5rem;
+}
+
+.inline-calendar-select:focus {
+	outline: none;
+	border-color: rgba(var(--color-pearl-aqua-rgb), 0.34);
+	box-shadow: 0 0 0 0.25rem var(--color-accent-soft);
 }
 
 .inline-calendar-weekdays,
@@ -1241,7 +1262,7 @@ button,
 	}
 
 	.date-shortcuts {
-		flex-direction: column;
+		grid-template-columns: 1fr;
 	}
 
 	.date-shortcut-button,

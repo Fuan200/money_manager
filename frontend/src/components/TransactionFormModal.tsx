@@ -96,6 +96,10 @@ function InlineCalendar({ selectedDate, onSelect }: InlineCalendarProps) {
 	const todayValue = formatDateOnlyLocal(new Date());
 	const [visibleMonth, setVisibleMonth] = useState<number>(selectedDateObject.getMonth());
 	const [visibleYear, setVisibleYear] = useState<number>(selectedDateObject.getFullYear());
+	const yearOptions = useMemo(() => {
+		const currentYear = new Date().getFullYear();
+		return Array.from({ length: 15 }, (_, index) => currentYear - 7 + index);
+	}, []);
 
 	const calendarDays = useMemo(() => {
 		const firstDayOfMonth = new Date(visibleYear, visibleMonth, 1);
@@ -159,9 +163,39 @@ function InlineCalendar({ selectedDate, onSelect }: InlineCalendarProps) {
 					<span aria-hidden="true">‹</span>
 				</button>
 
-				<p class="inline-calendar-title">
-					{MONTH_LABELS[visibleMonth]} {visibleYear}
-				</p>
+				<div class="inline-calendar-title">
+					<label class="visually-hidden" for="calendar-month-select">
+						Select month
+					</label>
+					<select
+						id="calendar-month-select"
+						class="inline-calendar-select"
+						value={String(visibleMonth)}
+						onInput={(event) => setVisibleMonth(Number.parseInt(event.currentTarget.value, 10))}
+					>
+						{MONTH_LABELS.map((monthLabel, monthIndex) => (
+							<option key={monthLabel} value={monthIndex}>
+								{monthLabel}
+							</option>
+						))}
+					</select>
+
+					<label class="visually-hidden" for="calendar-year-select">
+						Select year
+					</label>
+					<select
+						id="calendar-year-select"
+						class="inline-calendar-select inline-calendar-select-year"
+						value={String(visibleYear)}
+						onInput={(event) => setVisibleYear(Number.parseInt(event.currentTarget.value, 10))}
+					>
+						{yearOptions.map((yearOption) => (
+							<option key={yearOption} value={yearOption}>
+								{yearOption}
+							</option>
+						))}
+					</select>
+				</div>
 
 				<button
 					type="button"

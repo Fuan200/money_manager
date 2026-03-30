@@ -26,6 +26,7 @@ interface SelectItem {
 
 interface UserTransaction {
 	id: string;
+	updated_at: string;
 	amount: string;
 	description: string;
 	type: boolean;
@@ -115,8 +116,17 @@ export function HomeDashboard() {
 	);
 	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
 	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
-	const lastUsedTransactionDate = transactions[0]
-		? formatDateOnlyLocal(new Date(transactions[0].transaction_date))
+	const latestUpdatedTransaction = transactions.reduce<UserTransaction | null>((latestTransaction, transaction) => {
+		if (!latestTransaction) {
+			return transaction;
+		}
+
+		return new Date(transaction.updated_at).getTime() > new Date(latestTransaction.updated_at).getTime()
+			? transaction
+			: latestTransaction;
+	}, null);
+	const lastUsedTransactionDate = latestUpdatedTransaction
+		? formatDateOnlyLocal(new Date(latestUpdatedTransaction.transaction_date))
 		: null;
 
 	const loadTransactionOptions = async (token: string) => {
