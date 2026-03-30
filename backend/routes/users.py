@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 from email_validator import validate_email, EmailNotValidError
 from uuid import UUID
@@ -9,6 +10,7 @@ from core.database import get_session
 from core.security import hash_password
 
 from models import User, Account
+from services.demo_seed import create_demo_seed_data
 from schema.user import AuthResponse, CreateUser, LoginDto, UpdateUser, UserPublic, SuccessResponse
 
 users = APIRouter(prefix="/users", tags=["users"])
@@ -64,6 +66,39 @@ def create_user(user_data: CreateUser, session: Session = Depends(get_session)):
         session.add(account)
 
     session.commit()
+
+    return {"success": True, "data": user}
+
+
+@users.post("/create-user-with-demo-data", response_model=SuccessResponse[UserPublic])
+def create_user_with_demo_data(user_data: CreateUser, session: Session = Depends(get_session)):
+    try:
+        email_info = validate_email(user_data.email, check_deliverability=False)
+        user_data.email = email_info.normalized
+    except EmailNotValidError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    existing_user = session.exec(select(User).where(User.email == user_data.email)).first()
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    try:
+        user = User(
+            email=user_data.email,
+            password_hash=hash_password(user_data.password),
+        )
+
+        session.add(user)
+        session.flush()
+
+        create_demo_seed_data(session, user)
+
+        session.commit()
+        session.refresh(user)
+    except SQLAlchemyError:
+        session.rollback()
+        raise HTTPException(status_code=500, detail="DEMO_USER_CREATION_FAILED")
 
     return {"success": True, "data": user}
 
