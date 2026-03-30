@@ -3,6 +3,7 @@ import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
 import { TransactionFormModal, type TransactionFormState } from './TransactionFormModal';
+import { TotalBalanceCard } from './TotalBalanceCard';
 import type { JSX } from 'preact/jsx-runtime';
 
 interface SessionState {
@@ -287,12 +288,7 @@ export function HomeDashboard() {
 
 			<div class="app-content">
 				{sessionState ? (
-					<section class="summary-card home-total-card" aria-label="User total balance">
-						<div>
-							<p class="panel-label">Total balance</p>
-							<h1>{totalBalance}</h1>
-						</div>
-					</section>
+					<TotalBalanceCard totalBalance={totalBalance} />
 				) : null}
 
 				{sessionState ? (
