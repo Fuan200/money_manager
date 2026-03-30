@@ -111,16 +111,36 @@ def get_summary(session: Session = Depends(get_session),current_user: User = Dep
     statement = select(Transaction).where(Transaction.user_id == current_user.id)
     all_transactions = session.exec(statement).all()
     
-    total_income = sum(t.amount for t in all_transactions if t.type == True)
-    total_expense = sum(t.amount for t in all_transactions if t.type == False)
-    total = total_income + total_expense
+    incomes = [t for t in all_transactions if t.type == True]
+    expenses = [t for t in all_transactions if t.type == False]
+
+    total_income = sum(t.amount for t in incomes)
+    total_expense = sum(t.amount for t in expenses)
+
+    income_distribution = [
+        {
+            "id": t.id,
+            "amount": t.amount,
+            "percentage": round((t.amount / total_income) * 100, 2) if total_income > 0 else 0
+        }
+        for t in incomes
+    ]
+
+    expense_distribution = [
+        {
+            "id": t.id,
+            "amount": t.amount,
+            "percentage": round((t.amount / total_expense) * 100, 2) if total_expense > 0 else 0
+        }
+        for t in expenses
+    ]
 
     return {
         "success": True,
         "data": {
             "total_income": total_income,
             "total_expense": total_expense,
-            "income_percentage": round((total_income / total) * 100, 2) if total > 0 else 0,
-            "expense_percentage": round((total_expense / total) * 100, 2) if total > 0 else 0,
+            "income_distribution": income_distribution,
+            "expense_distribution": expense_distribution,
         }
     }
