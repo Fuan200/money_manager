@@ -42,7 +42,8 @@ def get_accounts_total(session: Session = Depends(get_session), current_user: Us
 
     total_debit = session.exec(statement_debit).one() or Decimal(0)
     total_credit = session.exec(statement_credit).one() or Decimal(0)
-    return {"success": True, "data": {"total_debit": total_debit, "total_credit": total_credit}}
+    total_accounts = total_debit - total_credit
+    return {"success": True, "data": {"total_total_accounts": total_accounts}}
 
 
 @accounts.post("/create-account", response_model=SuccessResponse[AccountPublic])

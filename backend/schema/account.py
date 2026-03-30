@@ -41,8 +41,7 @@ class UpdateAccount(BaseModel):
 
 
 class AccountsTotal(BaseModel):
-    total_debit: Decimal
-    total_credit: Decimal
+    total_accounts: Decimal
 
 
 class SuccessResponse(BaseModel, Generic[T]):
