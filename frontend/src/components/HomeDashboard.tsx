@@ -44,6 +44,18 @@ interface AccountsTotalResponse {
 
 type TransactionTab = 'expenses' | 'incomes';
 
+function formatDateOnlyLocal(date: Date): string {
+	const year = date.getFullYear();
+	const month = `${date.getMonth() + 1}`.padStart(2, '0');
+	const day = `${date.getDate()}`.padStart(2, '0');
+
+	return `${year}-${month}-${day}`;
+}
+
+function toTransactionIso(dateValue: string): string {
+	return new Date(`${dateValue}T12:00:00`).toISOString();
+}
+
 export function HomeDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
 	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
@@ -61,7 +73,7 @@ export function HomeDashboard() {
 		amount: '',
 		description: '',
 		type: false,
-		transactionDate: new Date().toISOString().slice(0, 16),
+		transactionDate: formatDateOnlyLocal(new Date()),
 		accountId: '',
 		categoryId: '',
 	});
@@ -103,6 +115,9 @@ export function HomeDashboard() {
 	);
 	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
 	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
+	const lastUsedTransactionDate = transactions[0]
+		? formatDateOnlyLocal(new Date(transactions[0].transaction_date))
+		: null;
 
 	const loadTransactionOptions = async (token: string) => {
 		setIsLoadingOptions(true);
@@ -166,13 +181,18 @@ export function HomeDashboard() {
 			amount: '',
 			description: '',
 			type: false,
-			transactionDate: new Date().toISOString().slice(0, 16),
-			accountId: '',
+			transactionDate: formatDateOnlyLocal(new Date()),
+			accountId: accounts[0]?.id ?? '',
 			categoryId: '',
 		});
 	};
 
 	const openTransactionModal = () => {
+		setTransactionFormState((currentState) => ({
+			...currentState,
+			accountId: currentState.accountId || accounts[0]?.id || '',
+			transactionDate: currentState.transactionDate || formatDateOnlyLocal(new Date()),
+		}));
 		setSubmitError('');
 		setIsTransactionModalOpen(true);
 	};
@@ -217,11 +237,6 @@ export function HomeDashboard() {
 			return;
 		}
 
-		if (!transactionFormState.description.trim()) {
-			setSubmitError('Description is required.');
-			return;
-		}
-
 		if (!transactionFormState.accountId) {
 			setSubmitError('Account is required.');
 			return;
@@ -250,7 +265,7 @@ export function HomeDashboard() {
 					amount: transactionFormState.amount.trim(),
 					description: transactionFormState.description.trim(),
 					type: transactionFormState.type,
-					transaction_date: new Date(transactionFormState.transactionDate).toISOString(),
+					transaction_date: toTransactionIso(transactionFormState.transactionDate),
 					account_id: transactionFormState.accountId,
 					category_id: transactionFormState.categoryId,
 					external_expense: false,
@@ -382,6 +397,7 @@ export function HomeDashboard() {
 					submitError={submitError}
 					accounts={accounts}
 					categories={availableCategories}
+					lastUsedTransactionDate={lastUsedTransactionDate}
 					onClose={closeTransactionModal}
 					onSubmit={handleTransactionSubmit}
 					onFieldChange={updateTransactionField}
