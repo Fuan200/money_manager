@@ -39,11 +39,18 @@ def create_transaction(transaction_data: CreateTransaction, session: Session = D
     category = session.get(Category, transaction_data.category_id)
     if not category:
         raise HTTPException(status_code=404, detail="CATEGORY NOT FOUND")
+    
+    transaction_type = transaction_data.type if transaction_data.type is not None else False
+
+    if transaction_type == True:
+        account.balance += transaction_data.amount
+    else:
+        account.balance -= transaction_data.amount
 
     transaction = Transaction(
         amount=transaction_data.amount,
         description=transaction_data.description,
-        type=transaction_data.type if transaction_data.type is not None else False,
+        type=transaction_type,
         external_expense=transaction_data.external_expense if transaction_data.external_expense is not None else False,
         transaction_date=transaction_data.transaction_date,
         account_id=transaction_data.account_id,
