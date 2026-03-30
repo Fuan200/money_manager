@@ -14,16 +14,17 @@ transfers = APIRouter(prefix="/transfers", tags=["transfers"])
 
 
 @transfers.get("/get-all-transfers-by-user", response_model=SuccessResponse[List[TransferPublic]])
-def get_transfers(session: Session = Depends(get_session), curren_user: User = Depends(get_current_user)):
-    statement = select(Transfer).where(Transfer.user_id == curren_user.id).order_by(Transfer.created_at.desc())
+def get_transfers(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    statement = select(Transfer).where(Transfer.user_id == current_user.id).order_by(Transfer.created_at.desc())
     transfers = session.exec(statement).all()
     return {"success": True, "data": transfers}
 
 
 @transfers.get("/get-transfer-by-id/{id}", response_model=SuccessResponse[TransferPublic])
-def get_transfer(id: UUID, session: Session = Depends(get_session), curren_user: User = Depends(get_current_user)):
+def get_transfer(id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     transfer = session.get(Transfer, id)
-    # TO DO: CHECK IF ACCOUNTS EXIST ????
+    if not transfer or transfer.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="TRANSFER_NOT_FOUND")
     return {"success": True, "data": transfer}
 
 
@@ -75,7 +76,7 @@ def delete_transfer(id: UUID, session: Session = Depends(get_session)):
     transfer = session.get(Transfer, id)
 
     if not transfer:
-        raise HTTPException(status_code=4040, detail="TRANSFER NOT FOUND")
+        raise HTTPException(status_code=404, detail="TRANSFER NOT FOUND")
 
     session.delete(transfer)
     session.commit()

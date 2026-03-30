@@ -6,7 +6,7 @@ from core.auth import decode_jwt_token
 from core.database import engine
 from models import User
 
-EXCLUDED_PATHS = {"/users/login"}
+EXCLUDED_PATHS = {"/", "/health", "/users/login", "/users/create-user"}
 UNAUTHORIZED = JSONResponse(
     status_code=401,
     content={"success": False, "error": "UNAUTHORIZED"},
