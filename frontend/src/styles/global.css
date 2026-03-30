@@ -253,10 +253,13 @@ button,
 }
 
 .home-total-card {
-	background:
-		linear-gradient(135deg, rgba(var(--color-verdigris-rgb), 0.22), rgba(var(--color-onyx-rgb), 0.92))
-			padding-box,
-		linear-gradient(180deg, var(--color-border-strong), var(--color-accent-wash)) border-box;
+	background: var(--color-surface-strong);
+	justify-content: center;
+	align-items: center;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 auto;
+	text-align: center;
 }
 
 .panel-grid {
