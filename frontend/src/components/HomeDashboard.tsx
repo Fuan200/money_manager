@@ -67,6 +67,8 @@ export function HomeDashboard() {
 	const [activeTransactionTab, setActiveTransactionTab] = useState<TransactionTab>('expenses');
 	const [isLoadingOptions, setIsLoadingOptions] = useState<boolean>(true);
 	const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
+	const [transactionModalMode, setTransactionModalMode] = useState<'create' | 'edit'>('create');
+	const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
 	const [submitError, setSubmitError] = useState<string>('');
 	const [submitSuccess, setSubmitSuccess] = useState<string>('');
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -198,6 +200,8 @@ export function HomeDashboard() {
 	};
 
 	const openTransactionModal = () => {
+		setTransactionModalMode('create');
+		setSelectedTransactionId(null);
 		setTransactionFormState((currentState) => ({
 			...currentState,
 			accountId: currentState.accountId || accounts[0]?.id || '',
@@ -207,8 +211,25 @@ export function HomeDashboard() {
 		setIsTransactionModalOpen(true);
 	};
 
+	const openEditTransactionModal = (transaction: UserTransaction) => {
+		setTransactionModalMode('edit');
+		setSelectedTransactionId(transaction.id);
+		setTransactionFormState({
+			amount: transaction.amount,
+			description: transaction.description,
+			type: transaction.type,
+			transactionDate: formatDateOnlyLocal(new Date(transaction.transaction_date)),
+			accountId: transaction.account_id,
+			categoryId: transaction.category_id,
+		});
+		setSubmitError('');
+		setSubmitSuccess('');
+		setIsTransactionModalOpen(true);
+	};
+
 	const closeTransactionModal = () => {
 		setIsTransactionModalOpen(false);
+		setSelectedTransactionId(null);
 		setSubmitError('');
 	};
 
@@ -265,8 +286,13 @@ export function HomeDashboard() {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(`${apiBaseUrl}/transactions/create-transaction`, {
-				method: 'POST',
+			const isEditMode = transactionModalMode === 'edit' && selectedTransactionId;
+			const response = await fetch(
+				isEditMode
+					? `${apiBaseUrl}/transactions/update-transactions/${selectedTransactionId}`
+					: `${apiBaseUrl}/transactions/create-transaction`,
+				{
+				method: isEditMode ? 'PATCH' : 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${sessionState.token}`,
@@ -280,7 +306,8 @@ export function HomeDashboard() {
 					category_id: transactionFormState.categoryId,
 					external_expense: false,
 				}),
-			});
+			},
+			);
 
 			if (!response.ok) {
 				const errorPayload = (await response.json().catch(() => null)) as
@@ -290,12 +317,65 @@ export function HomeDashboard() {
 				throw new Error(backendError);
 			}
 
-			setSubmitSuccess('Transaction created successfully.');
+			setSubmitSuccess(
+				transactionModalMode === 'edit'
+					? 'Transaction updated successfully.'
+					: 'Transaction created successfully.',
+			);
 			resetTransactionForm();
 			closeTransactionModal();
 			await loadTransactionOptions(sessionState.token);
 		} catch (error) {
-			setSubmitError(error instanceof Error ? error.message : 'Unable to create transaction.');
+			setSubmitError(
+				error instanceof Error
+					? error.message
+					: transactionModalMode === 'edit'
+						? 'Unable to update transaction.'
+						: 'Unable to create transaction.',
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const handleTransactionDelete = async () => {
+		if (!sessionState || !selectedTransactionId) {
+			return;
+		}
+
+		const selectedTransaction = transactions.find((transaction) => transaction.id === selectedTransactionId);
+		const transactionLabel = selectedTransaction?.description?.trim() || 'this transaction';
+		const shouldDelete = window.confirm(`Delete "${transactionLabel}"? This action cannot be undone.`);
+
+		if (!shouldDelete) {
+			return;
+		}
+
+		setIsSubmitting(true);
+		setSubmitError('');
+		setSubmitSuccess('');
+
+		try {
+			const response = await fetch(`${apiBaseUrl}/transactions/delete-transactions/${selectedTransactionId}`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${sessionState.token}`,
+				},
+			});
+
+			if (!response.ok) {
+				const errorPayload = (await response.json().catch(() => null)) as
+					| { error?: string; detail?: string }
+					| null;
+				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to delete transaction.';
+				throw new Error(backendError);
+			}
+
+			setSubmitSuccess('Transaction deleted successfully.');
+			closeTransactionModal();
+			await loadTransactionOptions(sessionState.token);
+		} catch (error) {
+			setSubmitError(error instanceof Error ? error.message : 'Unable to delete transaction.');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -358,7 +438,12 @@ export function HomeDashboard() {
 											const accountName = account?.name ?? 'Unknown account';
 
 											return (
-												<div class="transaction-row" key={transaction.id}>
+												<button
+													type="button"
+													class="transaction-row"
+													key={transaction.id}
+													onClick={() => openEditTransactionModal(transaction)}
+												>
 													<div class="account-leading">
 														<div class="account-icon-wrap" aria-hidden="true">
 															<span class="account-icon-fallback">
@@ -381,7 +466,7 @@ export function HomeDashboard() {
 														})}
 														className={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}
 													/>
-												</div>
+												</button>
 											);
 										})()
 									))}
@@ -402,6 +487,7 @@ export function HomeDashboard() {
 
 			{isTransactionModalOpen ? (
 				<TransactionFormModal
+					mode={transactionModalMode}
 					formState={transactionFormState}
 					isSubmitting={isSubmitting}
 					submitError={submitError}
@@ -410,6 +496,7 @@ export function HomeDashboard() {
 					lastUsedTransactionDate={lastUsedTransactionDate}
 					onClose={closeTransactionModal}
 					onSubmit={handleTransactionSubmit}
+					onDelete={transactionModalMode === 'edit' ? handleTransactionDelete : undefined}
 					onFieldChange={updateTransactionField}
 				/>
 			) : null}

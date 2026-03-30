@@ -21,6 +21,7 @@ export interface TransactionFormState {
 }
 
 interface TransactionFormModalProps {
+	mode: 'create' | 'edit';
 	formState: TransactionFormState;
 	isSubmitting: boolean;
 	submitError: string;
@@ -29,6 +30,7 @@ interface TransactionFormModalProps {
 	lastUsedTransactionDate: string | null;
 	onClose: () => void;
 	onSubmit: (event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>) => void | Promise<void>;
+	onDelete?: () => void | Promise<void>;
 	onFieldChange: <K extends keyof TransactionFormState>(field: K, value: TransactionFormState[K]) => void;
 }
 
@@ -245,6 +247,7 @@ function InlineCalendar({ selectedDate, onSelect }: InlineCalendarProps) {
 }
 
 export function TransactionFormModal({
+	mode,
 	formState,
 	isSubmitting,
 	submitError,
@@ -253,10 +256,12 @@ export function TransactionFormModal({
 	lastUsedTransactionDate,
 	onClose,
 	onSubmit,
+	onDelete,
 	onFieldChange,
 }: TransactionFormModalProps) {
 	const [isCategoryLibraryOpen, setIsCategoryLibraryOpen] = useState<boolean>(false);
 	const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
+	const isEditMode = mode === 'edit';
 	const selectedCategory = categories.find((category) => category.id === formState.categoryId) ?? null;
 	const orderedCategories = selectedCategory
 		? [selectedCategory, ...categories.filter((category) => category.id !== selectedCategory.id)]
@@ -311,8 +316,10 @@ export function TransactionFormModal({
 			>
 				<div class="modal-header">
 					<div class="form-card-header">
-						<p class="panel-label">New transaction</p>
-						<h2 id="transaction-form-title">Create a new movement</h2>
+						<p class="panel-label">{isEditMode ? 'Edit transaction' : 'New transaction'}</p>
+						<h2 id="transaction-form-title">
+							{isEditMode ? 'Review and update this movement' : 'Create a new movement'}
+						</h2>
 					</div>
 
 					<button type="button" class="modal-close-button" onClick={onClose} aria-label="Close modal">
@@ -498,8 +505,20 @@ export function TransactionFormModal({
 					) : null}
 
 					<div class="form-actions">
+						{isEditMode && onDelete ? (
+							<button type="button" class="danger-button" disabled={isSubmitting} onClick={() => void onDelete()}>
+								{isSubmitting ? 'Deleting...' : 'Delete transaction'}
+							</button>
+						) : null}
+
 						<button type="submit" class="primary-button" disabled={isSubmitting}>
-							{isSubmitting ? 'Creating...' : 'Create transaction'}
+							{isSubmitting
+								? isEditMode
+									? 'Saving...'
+									: 'Creating...'
+								: isEditMode
+									? 'Save changes'
+									: 'Create transaction'}
 						</button>
 					</div>
 				</form>

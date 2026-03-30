@@ -1119,10 +1119,25 @@ button,
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
+	width: 100%;
 	padding: 0.95rem 1rem;
 	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.1);
 	border-radius: var(--radius-md);
 	background: rgba(var(--color-onyx-rgb), 0.28);
+	text-align: left;
+}
+
+.transaction-row .account-leading {
+	flex: 1 1 auto;
+}
+
+.transaction-row .account-copy {
+	width: 100%;
+}
+
+.transaction-row .account-copy h3,
+.transaction-row .account-meta {
+	text-align: left;
 }
 
 .transaction-amount {
