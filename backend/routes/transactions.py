@@ -59,8 +59,7 @@ def create_transaction(transaction_data: CreateTransaction, session: Session = D
 
 @transactions.patch("/update-transactions/{id}", response_model=SuccessResponse[TransactionPublic])
 def update_transaction(
-    id: UUID, transaction_data: UpdateTransaction, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)
-):
+    id: UUID, transaction_data: UpdateTransaction, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     transaction = session.get(Transaction, id)
 
     if not transaction or transaction.user_id != current_user.id:
@@ -98,3 +97,23 @@ def delete_transaction(id: UUID, session: Session = Depends(get_session), curren
     session.commit()
 
     return {"success": True, "data": transaction}
+
+
+@transactions.get("/get-summary")
+def get_summary(session: Session = Depends(get_session),current_user: User = Depends(get_current_user),):
+    statement = select(Transaction).where(Transaction.user_id == current_user.id)
+    all_transactions = session.exec(statement).all()
+    
+    total_income = sum(t.amount for t in all_transactions if t.type == True)
+    total_expense = sum(t.amount for t in all_transactions if t.type == False)
+    total = total_income + total_expense
+
+    return {
+        "success": True,
+        "data": {
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "income_percentage": round((total_income / total) * 100, 2) if total > 0 else 0,
+            "expense_percentage": round((total_expense / total) * 100, 2) if total > 0 else 0,
+        }
+    }
