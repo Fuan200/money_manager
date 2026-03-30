@@ -32,12 +32,27 @@ interface UserTransaction {
 	category_id: string;
 }
 
+interface AccountsTotalResponse {
+	data: {
+		total_debit: string;
+		total_credit: string;
+	};
+}
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2,
+});
+
 export function HomeDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
 	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<SelectItem[]>([]);
 	const [categories, setCategories] = useState<SelectItem[]>([]);
 	const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+	const [totalBalance, setTotalBalance] = useState<string>(currencyFormatter.format(0));
 	const [isLoadingOptions, setIsLoadingOptions] = useState<boolean>(true);
 	const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
 	const [submitError, setSubmitError] = useState<string>('');
@@ -91,7 +106,7 @@ export function HomeDashboard() {
 		setIsLoadingOptions(true);
 
 		try {
-			const [accountsResponse, categoriesResponse] = await Promise.all([
+			const [accountsResponse, categoriesResponse, totalsResponse] = await Promise.all([
 				fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -102,17 +117,26 @@ export function HomeDashboard() {
 						Authorization: `Bearer ${token}`,
 					},
 				}),
+				fetch(`${apiBaseUrl}/accounts/get-accounts-total`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}),
 			]);
 
-			if (!accountsResponse.ok || !categoriesResponse.ok) {
+			if (!accountsResponse.ok || !categoriesResponse.ok || !totalsResponse.ok) {
 				throw new Error('Unable to load transaction options.');
 			}
 
 			const accountsPayload = (await accountsResponse.json()) as { data: SelectItem[] };
 			const categoriesPayload = (await categoriesResponse.json()) as { data: SelectItem[] };
+			const totalsPayload = (await totalsResponse.json()) as AccountsTotalResponse;
+			const totalDebit = Number.parseFloat(totalsPayload.data.total_debit ?? '0');
+			const totalCredit = Number.parseFloat(totalsPayload.data.total_credit ?? '0');
 
 			setAccounts(accountsPayload.data);
 			setCategories(categoriesPayload.data);
+			setTotalBalance(currencyFormatter.format(totalDebit - totalCredit));
 			await loadTransactions(token);
 		} catch (error) {
 			setSubmitError(error instanceof Error ? error.message : 'Unable to load transaction options.');
@@ -243,7 +267,7 @@ export function HomeDashboard() {
 			setSubmitSuccess('Transaction created successfully.');
 			resetTransactionForm();
 			closeTransactionModal();
-			await loadTransactions(sessionState.token);
+			await loadTransactionOptions(sessionState.token);
 		} catch (error) {
 			setSubmitError(error instanceof Error ? error.message : 'Unable to create transaction.');
 		} finally {
@@ -256,6 +280,15 @@ export function HomeDashboard() {
 			{sessionState ? <AppHeader activeTab="home" onSignOut={handleSignOut} /> : null}
 
 			<div class="app-content">
+				{sessionState ? (
+					<section class="summary-card home-total-card" aria-label="User total balance">
+						<div>
+							<p class="panel-label">Total balance</p>
+							<h1>{totalBalance}</h1>
+						</div>
+					</section>
+				) : null}
+
 				{sessionState ? (
 					<button type="button" class="primary-button" onClick={openTransactionModal}>
 						New transaction

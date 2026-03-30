@@ -230,6 +230,13 @@ button,
 	padding: clamp(1.4rem, 3vw, 2.25rem);
 }
 
+.home-total-card {
+	background:
+		linear-gradient(135deg, rgba(var(--color-verdigris-rgb), 0.22), rgba(var(--color-onyx-rgb), 0.92))
+			padding-box,
+		linear-gradient(180deg, var(--color-border-strong), var(--color-accent-wash)) border-box;
+}
+
 .panel-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
