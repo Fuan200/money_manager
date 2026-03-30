@@ -8,7 +8,7 @@ from core.auth import create_jwt_token, verify_password
 from core.database import get_session
 from core.security import hash_password
 
-from models import User
+from models import User, Account
 from schema.user import AuthResponse, CreateUser, LoginDto, UpdateUser, UserPublic, SuccessResponse
 
 users = APIRouter(prefix="/users", tags=["users"])
@@ -52,6 +52,18 @@ def create_user(user_data: CreateUser, session: Session = Depends(get_session)):
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    default_accounts = [
+        Account(name="Cash", balance=0, is_debit=True, balance_include=True, saving=False, user_id=user.id),
+        Account(name="Bank Account", balance=0, is_debit=True, balance_include=True, saving=False, user_id=user.id),
+        Account(name="Credit Card", balance=0, is_debit=False, balance_include=True, saving=False, user_id=user.id),
+        Account(name="Savings", balance=0, is_debit=True, balance_include=True, saving=True, user_id=user.id),
+    ]
+
+    for account in default_accounts:
+        session.add(account)
+
+    session.commit()
 
     return {"success": True, "data": user}
 
