@@ -34,9 +34,9 @@ interface UserTransaction {
 }
 
 interface AccountsTotalResponse {
+	success: true;
 	data: {
-		total_debit: string;
-		total_credit: string;
+		total_accounts: string;
 	};
 }
 
@@ -138,12 +138,11 @@ export function HomeDashboard() {
 			const accountsPayload = (await accountsResponse.json()) as { data: SelectItem[] };
 			const categoriesPayload = (await categoriesResponse.json()) as { data: SelectItem[] };
 			const totalsPayload = (await totalsResponse.json()) as AccountsTotalResponse;
-			const totalDebit = Number.parseFloat(totalsPayload.data.total_debit ?? '0');
-			const totalCredit = Number.parseFloat(totalsPayload.data.total_credit ?? '0');
+			const totalAccounts = Number.parseFloat(totalsPayload.data.total_accounts ?? '0');
 
 			setAccounts(accountsPayload.data);
 			setCategories(categoriesPayload.data);
-			setTotalBalance(currencyFormatter.format(totalDebit - totalCredit));
+			setTotalBalance(currencyFormatter.format(totalAccounts));
 			await loadTransactions(token);
 		} catch (error) {
 			setSubmitError(error instanceof Error ? error.message : 'Unable to load transaction options.');
