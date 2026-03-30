@@ -701,6 +701,40 @@ button,
 	margin-top: 1rem;
 }
 
+.transaction-tabs {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: fit-content;
+	padding: 0.35rem;
+	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+	border-radius: var(--radius-pill);
+	background: rgba(var(--color-onyx-rgb), 0.54);
+}
+
+.transaction-tab {
+	padding: 0.7rem 1rem;
+	border-radius: var(--radius-pill);
+	color: var(--color-text-muted);
+	font: inherit;
+	font-weight: 700;
+	line-height: 1;
+	transition:
+		background-color var(--transition-standard),
+		color var(--transition-standard);
+}
+
+.transaction-tab:hover,
+.transaction-tab:focus-visible {
+	background: rgba(var(--color-pearl-aqua-rgb), 0.12);
+	color: var(--color-text);
+}
+
+.transaction-tab.is-active {
+	background: var(--color-accent);
+	color: var(--color-bg);
+}
+
 .transaction-row {
 	display: flex;
 	align-items: center;

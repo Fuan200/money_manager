@@ -39,6 +39,8 @@ interface AccountsTotalResponse {
 	};
 }
 
+type TransactionTab = 'expenses' | 'incomes';
+
 const currencyFormatter = new Intl.NumberFormat('en-US', {
 	style: 'currency',
 	currency: 'USD',
@@ -53,6 +55,7 @@ export function HomeDashboard() {
 	const [categories, setCategories] = useState<SelectItem[]>([]);
 	const [transactions, setTransactions] = useState<UserTransaction[]>([]);
 	const [totalBalance, setTotalBalance] = useState<string>(currencyFormatter.format(0));
+	const [activeTransactionTab, setActiveTransactionTab] = useState<TransactionTab>('expenses');
 	const [isLoadingOptions, setIsLoadingOptions] = useState<boolean>(true);
 	const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
 	const [submitError, setSubmitError] = useState<string>('');
@@ -99,6 +102,9 @@ export function HomeDashboard() {
 	const expenseCategories = categories.filter((category) => !category.type);
 	const incomeCategories = categories.filter((category) => category.type);
 	const availableCategories = transactionFormState.type ? incomeCategories : expenseCategories;
+	const filteredTransactions = transactions.filter((transaction) =>
+		activeTransactionTab === 'incomes' ? transaction.type : !transaction.type,
+	);
 	const findAccount = (accountId: string) => accounts.find((account) => account.id === accountId);
 	const findCategory = (categoryId: string) => categories.find((category) => category.id === categoryId);
 
@@ -295,6 +301,29 @@ export function HomeDashboard() {
 					</button>
 				) : null}
 
+				{sessionState ? (
+					<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
+						<button
+							type="button"
+							role="tab"
+							class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
+							aria-selected={activeTransactionTab === 'expenses'}
+							onClick={() => setActiveTransactionTab('expenses')}
+						>
+							Expenses
+						</button>
+						<button
+							type="button"
+							role="tab"
+							class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
+							aria-selected={activeTransactionTab === 'incomes'}
+							onClick={() => setActiveTransactionTab('incomes')}
+						>
+							Incomes
+						</button>
+					</div>
+				) : null}
+
 				{submitSuccess ? (
 					<p class="success-banner" role="status">
 						{submitSuccess}
@@ -304,9 +333,9 @@ export function HomeDashboard() {
 				{sessionState ? (
 					<>
 						<section class="accounts-list-section">
-							{transactions.length > 0 ? (
+							{filteredTransactions.length > 0 ? (
 								<div class="transactions-stack">
-									{transactions.map((transaction) => (
+									{filteredTransactions.map((transaction) => (
 										(() => {
 											const category = findCategory(transaction.category_id);
 											const account = findAccount(transaction.account_id);
@@ -340,7 +369,9 @@ export function HomeDashboard() {
 								</div>
 							) : (
 								<div class="account-row-card">
-									<p class="panel-copy">No transactions yet.</p>
+									<p class="panel-copy">
+										No {activeTransactionTab === 'expenses' ? 'expenses' : 'incomes'} yet.
+									</p>
 								</div>
 							)}
 						</section>
