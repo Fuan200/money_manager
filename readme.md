@@ -6,6 +6,15 @@ Money Manager es una aplicación web completa para el manejo de finanzas persona
 
 Enlace a la demo: http://money-manager-frontend-hhlrx6-984dec-107-148-105-18.traefik.me/
 
+## ☁️ ¿Cómo has utilizado CubePath?
+Desplegamos el servicio de Dokploy con el servicio de CubePath, con el plan gp.micro.
+La estructura del Proyecto es:
+
+Base de Datos (PostgreSQL)
+Backend (FastAPI)
+Frontend (Astro + Preact)
+Ya dentro de dokploy, creamos un proyecto, creamos la db, el servicio del backend, y finalmente el del frontend.
+
 ## Features
 
 Money Manager ayuda a los usuarios a organizar sus finanzas personales en un solo lugar, con una interfaz web para dar seguimiento a balances, ingresos y gastos.
