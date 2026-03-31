@@ -4,6 +4,15 @@ Money Manager es una aplicación web completa para el manejo de finanzas persona
 
 ## Features
 
+Money Manager ayuda a los usuarios a organizar sus finanzas personales en un solo lugar, con una interfaz web para dar seguimiento a balances, ingresos y gastos.
+
+* Autenticación de usuarios con sesiones protegidas
+* Gestión de cuentas para crear, editar, eliminar y revisar cuentas personales
+* Vista general de balances con el total de dinero disponible entre cuentas
+* Gestión de categorías para clasificaciones de ingresos y gastos
+* Registro de transacciones de ingresos y gastos con asignación de cuenta y categoría
+* Vistas de panel para revisar la actividad financiera reciente
+* Desglose de ingresos y gastos por categoría para un análisis rápido de movimientos
 
 
 ## Stack
@@ -56,7 +65,7 @@ npm i
 npm run astro
 ```
 
-# Autores
+#### Autores
 
 :blue_heart: **Neonairb** - [NeoNairb](https://github.com/Neonairb)
 
