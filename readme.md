@@ -56,3 +56,11 @@ npm i
 npm run astro
 ```
 
+# Autores
+
+:blue_heart: **Neonairb** - [NeoNairb](https://github.com/Neonairb)
+
+:blue_heart: **Neicx** - [Neicx](https://github.com/Neicx)
+
+:blue_heart: **Fuan200** - [Fuan200](https://github.com/Fuan200)
+
