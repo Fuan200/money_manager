@@ -911,7 +911,7 @@ button,
 
 .checkbox-field {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: 0.85rem;
 	padding: 1rem 1.1rem;
 	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
@@ -922,7 +922,7 @@ button,
 .checkbox-field input {
 	width: 1rem;
 	height: 1rem;
-	margin-top: 0.2rem;
+	margin-top: 0;
 	accent-color: var(--color-accent);
 }
 
@@ -1288,7 +1288,7 @@ button,
 	color: var(--color-text-soft);
 }
 
-.account-form-card {
+.entity-form-card {
 	display: grid;
 	gap: 1.5rem;
 }
@@ -1366,28 +1366,30 @@ button,
 	margin: 0;
 }
 
-.account-form {
+.entity-form {
 	display: grid;
 	gap: 1rem;
 }
 
-.accounts-list-section {
-	/* display: grid; */
+.item-list-section {
+	display: grid;
 	gap: 1rem;
+	align-content: start;
 }
 
 .dashboard-section-stack {
 	display: grid;
 	gap: 0.85rem;
+	align-content: start;
 }
 
 .section-heading h2,
-.account-copy h3 {
+.item-copy h3 {
 	margin: 0;
 	letter-spacing: -0.04em;
 }
 
-.accounts-stack {
+.item-stack {
 	display: grid;
 	gap: 0.85rem;
 }
@@ -1405,11 +1407,11 @@ button,
 	align-content: start;
 }
 
-.category-section .accounts-stack {
+.category-section .item-stack {
 	align-content: start;
 }
 
-.account-row-card {
+.item-row-card {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -1427,25 +1429,25 @@ button,
 		box-shadow var(--transition-standard);
 }
 
-.account-row-card:hover,
-.account-row-card:focus-visible {
+.item-row-card:hover,
+.item-row-card:focus-visible {
 	border-color: rgba(var(--color-pearl-aqua-rgb), 0.32);
 	box-shadow: var(--shadow-elevated);
 	transform: translateY(-1px);
 }
 
-.account-row-card:active {
+.item-row-card:active {
 	transform: scale(0.99);
 }
 
-.account-leading {
+.item-leading {
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 	min-width: 0;
 }
 
-.account-icon-wrap {
+.item-icon-wrap {
 	display: grid;
 	place-items: center;
 	width: 3rem;
@@ -1457,30 +1459,30 @@ button,
 	flex-shrink: 0;
 }
 
-.account-icon {
+.item-icon {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 }
 
-.account-icon-fallback {
+.item-icon-fallback {
 	color: var(--color-accent-strong);
 	font-size: 1rem;
 	font-weight: 700;
 }
 
-.account-copy {
+.item-copy {
 	min-width: 0;
 }
 
-.account-meta {
+.item-meta {
 	margin: 0.35rem 0 0;
 	color: var(--color-text-soft);
 	font-size: 0.92rem;
 	line-height: 1.4;
 }
 
-.account-balance {
+.item-balance {
 	margin: 0;
 	color: var(--color-text);
 	font-size: clamp(1.1rem, 2vw, 1.35rem);
@@ -1490,11 +1492,95 @@ button,
 	font-variant-numeric: tabular-nums slashed-zero;
 }
 
-.account-balance.is-debit {
+.item-balance.is-debit {
 	color: var(--color-text);
 }
 
-.account-balance.is-credit {
+.item-balance.is-credit {
+	color: var(--color-text-muted);
+}
+
+.account-grid {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 1rem;
+	align-items: stretch;
+}
+
+.account-card {
+	display: grid;
+	align-content: start;
+	gap: 0.7rem;
+	min-height: 10rem;
+	padding: 1.1rem;
+	border: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
+	border-radius: var(--radius-lg);
+	background: var(--color-surface-strong);
+	box-shadow: var(--shadow-soft);
+	text-align: left;
+	transition:
+		border-color var(--transition-standard),
+		transform var(--transition-standard),
+		box-shadow var(--transition-standard);
+}
+
+.account-card:hover,
+.account-card:focus-visible {
+	border-color: rgba(var(--color-pearl-aqua-rgb), 0.32);
+	box-shadow: var(--shadow-elevated);
+	transform: translateY(-1px);
+}
+
+.account-card:active {
+	transform: scale(0.99);
+}
+
+.account-card-top,
+.account-card-copy {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.account-card-top {
+	display: flex;
+	align-items: start;
+	gap: 0.85rem;
+}
+
+.account-card-icon {
+	width: 3.25rem;
+	height: 3.25rem;
+}
+
+.account-card-title,
+.account-card-balance {
+	margin: 0;
+}
+
+.account-card-title {
+	align-self: center;
+	min-width: 0;
+	letter-spacing: -0.04em;
+	line-height: 1.2;
+}
+
+.account-card-copy .item-meta {
+	margin-top: 0;
+}
+
+.account-card-balance {
+	margin-top: 0.2rem;
+	font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.account-card-balance.is-debit {
+	color: var(--color-text);
+}
+
+.account-card-balance.is-credit {
 	color: var(--color-text-muted);
 }
 
@@ -1556,16 +1642,16 @@ button,
 	text-align: left;
 }
 
-.transaction-row .account-leading {
+.transaction-row .item-leading {
 	flex: 1 1 auto;
 }
 
-.transaction-row .account-copy {
+.transaction-row .item-copy {
 	width: 100%;
 }
 
-.transaction-row .account-copy h3,
-.transaction-row .account-meta {
+.transaction-row .item-copy h3,
+.transaction-row .item-meta {
 	text-align: left;
 }
 
@@ -1658,6 +1744,10 @@ button,
 		grid-template-columns: 1fr;
 	}
 
+	.account-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
 	.app-sidebar {
 		position: static;
 		min-height: auto;
@@ -1666,7 +1756,7 @@ button,
 		border-bottom: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
 	}
 
-	.account-row-card {
+	.item-row-card {
 		align-items: flex-start;
 		flex-direction: column;
 	}
@@ -1754,6 +1844,10 @@ button,
 		grid-template-columns: 1fr 1fr;
 	}
 
+	.account-grid {
+		grid-template-columns: 1fr;
+	}
+
 	.date-shortcuts {
 		grid-template-columns: 1fr;
 	}
@@ -1762,5 +1856,17 @@ button,
 	.category-picker-more {
 		width: 100%;
 		min-width: 100%;
+	}
+}
+
+@media (max-width: 1400px) {
+	.account-grid {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 1180px) {
+	.account-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 }

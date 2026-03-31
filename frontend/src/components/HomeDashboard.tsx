@@ -484,7 +484,7 @@ export function HomeDashboard() {
 						</p>
 					) : null}
 
-					<section class="accounts-list-section">
+					<section class="item-list-section">
 						{filteredTransactions.length > 0 ? (
 							<div class="transactions-stack">
 								{filteredTransactions.map((transaction) => (
@@ -501,16 +501,16 @@ export function HomeDashboard() {
 												key={transaction.id}
 												onClick={() => openEditTransactionModal(transaction)}
 											>
-												<div class="account-leading">
-													<div class="account-icon-wrap" aria-hidden="true">
-														<span class="account-icon-fallback">
+												<div class="item-leading">
+													<div class="item-icon-wrap" aria-hidden="true">
+														<span class="item-icon-fallback">
 															{categoryName.slice(0, 1).toUpperCase()}
 														</span>
 													</div>
 
-													<div class="account-copy">
+													<div class="item-copy">
 														<h3>{categoryName}</h3>
-														<p class="account-meta">
+														<p class="item-meta">
 															{transaction.description} | {accountName}
 														</p>
 													</div>
@@ -529,7 +529,7 @@ export function HomeDashboard() {
 								))}
 							</div>
 						) : (
-							<div class="account-row-card">
+							<div class="item-row-card">
 								<p class="panel-copy">
 									No {activeTransactionTab === 'expenses' ? 'expenses' : 'incomes'} yet.
 								</p>

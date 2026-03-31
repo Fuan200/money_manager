@@ -2,7 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 
 interface AppHeaderProps {
-	activeTab: 'home' | 'accounts' | 'categories';
+	activeTab: 'home' | 'categories' | 'accounts';
 	onSignOut: () => void;
 	children: ComponentChildren;
 }
@@ -22,19 +22,11 @@ function HomeIcon() {
 	);
 }
 
-function AccountsIcon() {
+function CategoriesIcon() {
 	return (
 		<svg viewBox="0 0 24 24" aria-hidden="true">
 			<path
-				d="M4.75 7.75a2 2 0 0 1 2-2h10.5a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H6.75a2 2 0 0 1-2-2z"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.8"
-			/>
-			<path
-				d="M4.75 10h14.5M8 14.25h2.5"
+				d="M6 6h5.25v5.25H6zm6.75 0H18v5.25h-5.25zM6 12.75h5.25V18H6zm6.75 0H18V18h-5.25z"
 				fill="none"
 				stroke="currentColor"
 				stroke-linecap="round"
@@ -45,11 +37,11 @@ function AccountsIcon() {
 	);
 }
 
-function CategoriesIcon() {
+function AccountsIcon() {
 	return (
 		<svg viewBox="0 0 24 24" aria-hidden="true">
 			<path
-				d="M6 6h5.25v5.25H6zm6.75 0H18v5.25h-5.25zM6 12.75h5.25V18H6zm6.75 0H18V18h-5.25z"
+				d="M4.75 7.25c0-1.1.9-2 2-2h10.5c1.1 0 2 .9 2 2v9.5c0 1.1-.9 2-2 2H6.75c-1.1 0-2-.9-2-2zm0 3.5h14.5M8.25 14.25h3.5"
 				fill="none"
 				stroke="currentColor"
 				stroke-linecap="round"

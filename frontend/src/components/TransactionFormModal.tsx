@@ -308,7 +308,7 @@ export function TransactionFormModal({
 	return (
 		<div class="modal-backdrop" onClick={onClose}>
 			<section
-				class="modal-card account-form-card"
+				class="modal-card entity-form-card"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="transaction-form-title"
@@ -327,7 +327,7 @@ export function TransactionFormModal({
 					</button>
 				</div>
 
-				<form class="account-form" onSubmit={onSubmit}>
+				<form class="entity-form" onSubmit={onSubmit}>
 					<label class="field">
 						<span>Amount</span>
 						<input
@@ -392,11 +392,11 @@ export function TransactionFormModal({
 										setIsCategoryLibraryOpen(false);
 									}}
 								>
-									<span class="account-icon-wrap category-picker-icon" aria-hidden="true">
+									<span class="item-icon-wrap category-picker-icon" aria-hidden="true">
 										{category.icon?.url ? (
-											<img src={category.icon.url} alt="" class="account-icon" loading="lazy" />
+											<img src={category.icon.url} alt="" class="item-icon" loading="lazy" />
 										) : (
-											<span class="account-icon-fallback">
+											<span class="item-icon-fallback">
 												{category.name.slice(0, 1).toUpperCase()}
 											</span>
 										)}

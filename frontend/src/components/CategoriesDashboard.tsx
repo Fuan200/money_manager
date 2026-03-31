@@ -287,7 +287,7 @@ export function CategoriesDashboard() {
 							</p>
 						) : null}
 
-						<section class="accounts-list-section">
+						<section class="item-list-section">
 							{categoriesError ? (
 								<p class="error-banner" role="alert">
 									{categoriesError}
@@ -295,8 +295,8 @@ export function CategoriesDashboard() {
 							) : null}
 
 							{!isLoadingCategories && !categoriesError && categories.length === 0 ? (
-								<div class="accounts-stack">
-									<div class="account-row-card">
+								<div class="item-stack">
+									<div class="item-row-card">
 										<p class="panel-copy">No categories found for this user yet.</p>
 									</div>
 								</div>
@@ -311,39 +311,39 @@ export function CategoriesDashboard() {
 											</div>
 										</div>
 
-										<div class="accounts-stack">
+										<div class="item-stack">
 											{expenseCategories.length > 0 ? (
 												expenseCategories.map((category) => (
 													<button
 														type="button"
-														class="account-row-card"
+														class="item-row-card"
 														key={category.id}
 														onClick={() => openEditModal(category)}
 													>
-														<div class="account-leading">
-															<div class="account-icon-wrap" aria-hidden="true">
+														<div class="item-leading">
+															<div class="item-icon-wrap" aria-hidden="true">
 																{category.icon?.url ? (
 																	<img
 																		src={category.icon.url}
 																		alt=""
-																		class="account-icon"
+																		class="item-icon"
 																		loading="lazy"
 																	/>
 																) : (
-																	<span class="account-icon-fallback">
+																	<span class="item-icon-fallback">
 																		{category.name.slice(0, 1).toUpperCase()}
 																	</span>
 																)}
 															</div>
 
-															<div class="account-copy">
+															<div class="item-copy">
 																<h3>{category.name}</h3>
 															</div>
 														</div>
 													</button>
 												))
 											) : (
-												<div class="account-row-card">
+												<div class="item-row-card">
 													<p class="panel-copy">No expense categories yet.</p>
 												</div>
 											)}
@@ -357,39 +357,39 @@ export function CategoriesDashboard() {
 											</div>
 										</div>
 
-										<div class="accounts-stack">
+										<div class="item-stack">
 											{incomeCategories.length > 0 ? (
 												incomeCategories.map((category) => (
 													<button
 														type="button"
-														class="account-row-card"
+														class="item-row-card"
 														key={category.id}
 														onClick={() => openEditModal(category)}
 													>
-														<div class="account-leading">
-															<div class="account-icon-wrap" aria-hidden="true">
+														<div class="item-leading">
+															<div class="item-icon-wrap" aria-hidden="true">
 																{category.icon?.url ? (
 																	<img
 																		src={category.icon.url}
 																		alt=""
-																		class="account-icon"
+																		class="item-icon"
 																		loading="lazy"
 																	/>
 																) : (
-																	<span class="account-icon-fallback">
+																	<span class="item-icon-fallback">
 																		{category.name.slice(0, 1).toUpperCase()}
 																	</span>
 																)}
 															</div>
 
-															<div class="account-copy">
+															<div class="item-copy">
 																<h3>{category.name}</h3>
 															</div>
 														</div>
 													</button>
 												))
 											) : (
-												<div class="account-row-card">
+												<div class="item-row-card">
 													<p class="panel-copy">No income categories yet.</p>
 												</div>
 											)}
