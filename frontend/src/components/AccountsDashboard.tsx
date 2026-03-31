@@ -1,28 +1,15 @@
 import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
-import { currencyFormatter, formatCurrencyValue } from '../lib/currency';
+import { formatCurrencyValue } from '../lib/currency';
 import { AccountFormModal, type AccountFormState } from './AccountFormModal';
-import { AnimatedAmount } from './AnimatedAmount';
 import { AppHeader } from './AppHeader';
 import { LoadingOverlay } from './LoadingOverlay';
-import { TotalBalanceCard } from './TotalBalanceCard';
+import { SectionActionButton } from './SectionActionButton';
 
 interface SessionState {
 	email: string;
 	token: string;
-}
-
-interface AccountApiResponse {
-	success: true;
-	data: {
-		id: string;
-		name: string;
-		balance: string;
-		balance_include: boolean;
-		saving: boolean;
-		is_debit: boolean;
-	};
 }
 
 interface UserAccount {
@@ -32,11 +19,11 @@ interface UserAccount {
 	balance_include: boolean;
 	saving: boolean;
 	is_debit: boolean;
-	icon: {
-		id: string;
-		label: string;
-		url: string;
-	} | null;
+}
+
+interface AccountApiResponse {
+	success: true;
+	data: UserAccount;
 }
 
 interface AccountsListResponse {
@@ -44,18 +31,18 @@ interface AccountsListResponse {
 	data: UserAccount[];
 }
 
-interface AccountsTotalResponse {
-	success: true;
-	data: {
-		total_accounts: string;
-	};
-}
+const defaultFormState: AccountFormState = {
+	name: '',
+	balance: '',
+	isDebit: true,
+	balanceInclude: true,
+	saving: false,
+};
 
 export function AccountsDashboard() {
 	const [sessionState, setSessionState] = useState<SessionState | null>(null);
 	const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 	const [accounts, setAccounts] = useState<UserAccount[]>([]);
-	const [totalBalance, setTotalBalance] = useState<string>(currencyFormatter.format(0));
 	const [isLoadingAccounts, setIsLoadingAccounts] = useState<boolean>(true);
 	const [accountsError, setAccountsError] = useState<string>('');
 	const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
@@ -63,14 +50,7 @@ export function AccountsDashboard() {
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const [submitError, setSubmitError] = useState<string>('');
 	const [submitSuccess, setSubmitSuccess] = useState<string>('');
-	const [formState, setFormState] = useState<AccountFormState>({
-		name: '',
-		balance: '',
-		balanceInclude: true,
-		saving: false,
-		isDebit: true,
-		iconId: '',
-	});
+	const [formState, setFormState] = useState<AccountFormState>(defaultFormState);
 
 	useEffect(() => {
 		const session = readAuthSession();
@@ -101,10 +81,7 @@ export function AccountsDashboard() {
 		window.location.replace('/');
 	};
 
-	const updateField = <K extends keyof AccountFormState>(
-		field: K,
-		value: AccountFormState[K],
-	) => {
+	const updateField = <K extends keyof AccountFormState>(field: K, value: AccountFormState[K]) => {
 		setFormState((currentState) => ({
 			...currentState,
 			[field]: value,
@@ -112,14 +89,7 @@ export function AccountsDashboard() {
 	};
 
 	const resetForm = () => {
-		setFormState({
-			name: '',
-			balance: '',
-			balanceInclude: true,
-			saving: false,
-			isDebit: true,
-			iconId: '',
-		});
+		setFormState(defaultFormState);
 	};
 
 	const closeModal = () => {
@@ -140,10 +110,9 @@ export function AccountsDashboard() {
 		setFormState({
 			name: account.name,
 			balance: account.balance,
+			isDebit: account.is_debit,
 			balanceInclude: account.balance_include,
 			saving: account.saving,
-			isDebit: account.is_debit,
-			iconId: account.icon?.id ?? '',
 		});
 		setSelectedAccountId(account.id);
 		setSubmitError('');
@@ -155,35 +124,23 @@ export function AccountsDashboard() {
 		setIsLoadingAccounts(true);
 		setAccountsError('');
 
-	try {
-			const [accountsResponse, totalsResponse] = await Promise.all([
-				fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				}),
-				fetch(`${apiBaseUrl}/accounts/get-accounts-total`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				}),
-			]);
+		try {
+			const response = await fetch(`${apiBaseUrl}/accounts/get-all-accounts-by-user`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
-			if (!accountsResponse.ok || !totalsResponse.ok) {
-				const failedResponse = accountsResponse.ok ? totalsResponse : accountsResponse;
-				const errorPayload = (await failedResponse.json().catch(() => null)) as
+			if (!response.ok) {
+				const errorPayload = (await response.json().catch(() => null)) as
 					| { error?: string; detail?: string }
 					| null;
 				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to load accounts.';
 				throw new Error(backendError);
 			}
 
-			const accountsPayload = (await accountsResponse.json()) as AccountsListResponse;
-			const totalsPayload = (await totalsResponse.json()) as AccountsTotalResponse;
-			const totalAccounts = Number.parseFloat(totalsPayload.data.total_accounts ?? '0');
-
-			setAccounts(accountsPayload.data);
-			setTotalBalance(currencyFormatter.format(totalAccounts));
+			const payload = (await response.json()) as AccountsListResponse;
+			setAccounts(payload.data);
 		} catch (error) {
 			setAccountsError(error instanceof Error ? error.message : 'Unable to load accounts.');
 		} finally {
@@ -191,9 +148,7 @@ export function AccountsDashboard() {
 		}
 	};
 
-	const handleAccountSubmit = async (
-		event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>,
-	) => {
+	const handleAccountSubmit = async (event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>) => {
 		event.preventDefault();
 
 		if (!sessionState) {
@@ -209,7 +164,7 @@ export function AccountsDashboard() {
 		}
 
 		if (!formState.balance.trim()) {
-			setSubmitError('Initial balance is required.');
+			setSubmitError('Current balance is required.');
 			return;
 		}
 
@@ -222,19 +177,18 @@ export function AccountsDashboard() {
 					? `${apiBaseUrl}/accounts/update-account/${selectedAccountId}`
 					: `${apiBaseUrl}/accounts/create-account`,
 				{
-				method: isEditMode ? 'PATCH' : 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${sessionState.token}`,
-				},
-				body: JSON.stringify({
-					name: formState.name.trim(),
-					balance: formState.balance.trim(),
-					balance_include: formState.balanceInclude,
-					saving: formState.saving,
-					is_debit: formState.isDebit,
-					icon_id: formState.iconId.trim() || null,
-				}),
+					method: isEditMode ? 'PATCH' : 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${sessionState.token}`,
+					},
+					body: JSON.stringify({
+						name: formState.name.trim(),
+						balance: formState.balance.trim(),
+						balance_include: formState.balanceInclude,
+						saving: formState.saving,
+						is_debit: formState.isDebit,
+					}),
 				},
 			);
 
@@ -242,7 +196,7 @@ export function AccountsDashboard() {
 				const errorPayload = (await response.json().catch(() => null)) as
 					| { error?: string; detail?: string }
 					| null;
-				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to create account.';
+				const backendError = errorPayload?.error ?? errorPayload?.detail ?? 'Unable to save account.';
 				throw new Error(backendError);
 			}
 
@@ -315,87 +269,66 @@ export function AccountsDashboard() {
 	return (
 		<section>
 			{sessionState ? (
-				<AppHeader
-					activeTab="accounts"
-					onSignOut={handleSignOut}
-				>
-					<TotalBalanceCard totalBalance={totalBalance} />
+				<AppHeader activeTab="accounts" onSignOut={handleSignOut}>
+					<div class="dashboard-section-stack">
+						<SectionActionButton label="Create account" onClick={openCreateModal} />
 
-					<button
-						type="button"
-						class="primary-button"
-						onClick={openCreateModal}
-					>
-						New account
-					</button>
-
-					{submitSuccess ? (
-						<p class="success-banner" role="status">
-							{submitSuccess}
-						</p>
-					) : null}
-
-					<section class="accounts-list-section">
-						{accountsError ? (
-							<p class="error-banner" role="alert">
-								{accountsError}
+						{submitSuccess ? (
+							<p class="success-banner" role="status">
+								{submitSuccess}
 							</p>
 						) : null}
 
-						{!isLoadingAccounts && !accountsError && accounts.length === 0 ? (
-							<div class="accounts-stack">
-								<div class="account-row-card">
-									<p class="panel-copy">No accounts found for this user yet.</p>
-								</div>
-							</div>
-						) : null}
+						<section class="item-list-section">
+							{accountsError ? (
+								<p class="error-banner" role="alert">
+									{accountsError}
+								</p>
+							) : null}
 
-						{!isLoadingAccounts && accounts.length > 0 ? (
-							<div class="accounts-stack">
-								{accounts.map((account) => (
-									<button
-										type="button"
-										class="account-row-card"
-										key={account.id}
-										onClick={() => openEditModal(account)}
-									>
-										<div class="account-leading">
-											<div class="account-icon-wrap" aria-hidden="true">
-												{account.icon?.url ? (
-													<img
-														src={account.icon.url}
-														alt=""
-														class="account-icon"
-														loading="lazy"
-													/>
-												) : (
-													<span class="account-icon-fallback">
+							{!isLoadingAccounts && !accountsError && accounts.length === 0 ? (
+								<div class="item-stack">
+									<div class="item-row-card">
+										<p class="panel-copy">No accounts found for this user yet.</p>
+									</div>
+								</div>
+							) : null}
+
+							{!isLoadingAccounts && accounts.length > 0 ? (
+								<div class="account-grid" role="list" aria-label="Accounts">
+									{accounts.map((account) => (
+										<button
+											type="button"
+											class="account-card"
+											key={account.id}
+											onClick={() => openEditModal(account)}
+											role="listitem"
+										>
+											<div class="account-card-top">
+												<div class="item-icon-wrap account-card-icon" aria-hidden="true">
+													<span class="item-icon-fallback">
 														{account.name.slice(0, 1).toUpperCase()}
 													</span>
-												)}
+												</div>
+
+												<h3 class="account-card-title">{account.name}</h3>
 											</div>
 
-											<div class="account-copy">
-												<h3>{account.name}</h3>
-												<p class="account-meta">
-													{account.is_debit ? 'Debit' : 'Credit'}
-													{account.saving ? ' | Savings' : ' | Standard'}
-													{account.balance_include ? ' | Included in totals' : ' | Excluded from totals'}
+											<div class="account-card-copy">
+												<p class="item-meta">
+													{account.balance_include ? 'Included in total' : 'Excluded from total'}
 												</p>
 											</div>
-										</div>
 
-										<AnimatedAmount
-											value={formatCurrencyValue(account.balance, {
-												multiplier: account.is_debit ? 1 : -1,
-											})}
-											className={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}
-										/>
-									</button>
-								))}
-							</div>
-						) : null}
-					</section>
+											<p class={`account-card-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}>
+												{formatCurrencyValue(account.balance, account.is_debit ? { positivePrefix: '+' } : { multiplier: -1 })}
+											</p>
+										</button>
+									))}
+								</div>
+							) : null}
+						</section>
+					</div>
 				</AppHeader>
 			) : null}
 

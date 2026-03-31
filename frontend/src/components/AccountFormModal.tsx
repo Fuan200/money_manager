@@ -3,10 +3,9 @@ import type { JSX } from 'preact';
 export interface AccountFormState {
 	name: string;
 	balance: string;
+	isDebit: boolean;
 	balanceInclude: boolean;
 	saving: boolean;
-	isDebit: boolean;
-	iconId: string;
 }
 
 interface AccountFormModalProps {
@@ -35,7 +34,7 @@ export function AccountFormModal({
 	return (
 		<div class="modal-backdrop" onClick={onClose}>
 			<section
-				class="modal-card account-form-card"
+				class="modal-card entity-form-card"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="account-form-title"
@@ -45,7 +44,7 @@ export function AccountFormModal({
 					<div class="form-card-header">
 						<p class="panel-label">{isEditMode ? 'Edit account' : 'Create account'}</p>
 						<h2 id="account-form-title">
-							{isEditMode ? 'Review and update this account' : 'Enter the backend account fields'}
+							{isEditMode ? 'Review and update this account' : 'Enter the account fields'}
 						</h2>
 					</div>
 
@@ -54,7 +53,7 @@ export function AccountFormModal({
 					</button>
 				</div>
 
-				<form class="account-form" onSubmit={onSubmit}>
+				<form class="entity-form" onSubmit={onSubmit}>
 					<label class="field">
 						<span>Name</span>
 						<input
@@ -62,19 +61,20 @@ export function AccountFormModal({
 							name="name"
 							value={formState.name}
 							onInput={(event) => onFieldChange('name', event.currentTarget.value)}
-							placeholder="Main checking"
+							placeholder="Cash wallet"
 							required
 						/>
 					</label>
 
 					<label class="field">
-						<span>Balance</span>
+						<span>Current balance</span>
 						<input
 							type="number"
 							name="balance"
 							value={formState.balance}
 							onInput={(event) => onFieldChange('balance', event.currentTarget.value)}
 							placeholder="0.00"
+							inputMode="decimal"
 							step="0.01"
 							required
 						/>
@@ -82,41 +82,25 @@ export function AccountFormModal({
 
 					<div class="field">
 						<span>Account type</span>
-						<div class="option-toggle" role="tablist" aria-label="Account type">
+						<div class="option-toggle" role="radiogroup" aria-label="Account type">
 							<button
 								type="button"
-								role="tab"
-								aria-selected={formState.isDebit}
 								class={`option-toggle-button ${formState.isDebit ? 'is-active' : ''}`}
+								aria-pressed={formState.isDebit}
 								onClick={() => onFieldChange('isDebit', true)}
 							>
 								Debit
 							</button>
 							<button
 								type="button"
-								role="tab"
-								aria-selected={!formState.isDebit}
 								class={`option-toggle-button ${!formState.isDebit ? 'is-active' : ''}`}
+								aria-pressed={!formState.isDebit}
 								onClick={() => onFieldChange('isDebit', false)}
 							>
 								Credit
 							</button>
 						</div>
-						<p class="field-help">
-							Debit accounts add to your available money. Credit accounts track money you owe.
-						</p>
 					</div>
-
-					{/* <label class="field">
-						<span>Icon ID</span>
-						<input
-							type="text"
-							name="iconId"
-							value={formState.iconId}
-							onInput={(event) => onFieldChange('iconId', event.currentTarget.value)}
-							placeholder="Optional UUID"
-						/>
-					</label> */}
 
 					<label class="checkbox-field">
 						<input
@@ -125,22 +109,8 @@ export function AccountFormModal({
 							checked={formState.balanceInclude}
 							onInput={(event) => onFieldChange('balanceInclude', event.currentTarget.checked)}
 						/>
-						<div>
-							<span>Include balance in totals</span>
-						</div>
+						<span>Include this account in the total balance.</span>
 					</label>
-
-					{/* <label class="checkbox-field">
-						<input
-							type="checkbox"
-							name="saving"
-							checked={formState.saving}
-							onInput={(event) => onFieldChange('saving', event.currentTarget.checked)}
-						/>
-						<div>
-							<span>Savings account</span>
-						</div>
-					</label> */}
 
 					{submitError ? (
 						<p class="error-banner" role="alert">
