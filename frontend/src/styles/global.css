@@ -439,11 +439,24 @@ button,
 
 .home-total-card {
 	background: var(--color-surface-strong);
+	width: min(100%, 52rem);
 	justify-content: center;
 	align-items: center;
-	max-width: 52rem;
-	margin: 0 auto;
+	justify-self: center;
+	margin: 0;
 	text-align: center;
+}
+
+.total-balance-card-content {
+	display: grid;
+	align-content: center;
+	justify-items: center;
+	gap: 0.75rem;
+}
+
+.total-balance-card-content h2,
+.total-balance-card-content .summary-value {
+	margin: 0;
 }
 
 .app-main > .app-content {
@@ -782,6 +795,17 @@ button,
 .primary-button:disabled {
 	opacity: 0.7;
 	cursor: wait;
+}
+
+.section-action-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	align-self: start;
+	/* justify-self: end; */
+	min-height: 3rem;
+	max-width: 100%;
+	white-space: nowrap;
 }
 
 .danger-button {
@@ -1348,8 +1372,13 @@ button,
 }
 
 .accounts-list-section {
-	display: grid;
+	/* display: grid; */
 	gap: 1rem;
+}
+
+.dashboard-section-stack {
+	display: grid;
+	gap: 0.85rem;
 }
 
 .section-heading h2,

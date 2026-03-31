@@ -4,6 +4,7 @@ import { apiBaseUrl, clearAuthSession, readAuthSession } from '../lib/auth';
 import { AppHeader } from './AppHeader';
 import { CategoryFormModal, type CategoryFormState } from './CategoryFormModal';
 import { LoadingOverlay } from './LoadingOverlay';
+import { SectionActionButton } from './SectionActionButton';
 
 interface SessionState {
 	email: string;
@@ -277,127 +278,127 @@ export function CategoriesDashboard() {
 		<section>
 			{sessionState ? (
 				<AppHeader activeTab="categories" onSignOut={handleSignOut}>
-					<button type="button" class="primary-button" onClick={openCreateModal}>
-						New category
-					</button>
+					<div class="dashboard-section-stack">
+						<SectionActionButton label="Create category" onClick={openCreateModal} />
 
-					{submitSuccess ? (
-						<p class="success-banner" role="status">
-							{submitSuccess}
-						</p>
-					) : null}
-
-					<section class="accounts-list-section">
-						{categoriesError ? (
-							<p class="error-banner" role="alert">
-								{categoriesError}
+						{submitSuccess ? (
+							<p class="success-banner" role="status">
+								{submitSuccess}
 							</p>
 						) : null}
 
-						{!isLoadingCategories && !categoriesError && categories.length === 0 ? (
-							<div class="accounts-stack">
-								<div class="account-row-card">
-									<p class="panel-copy">No categories found for this user yet.</p>
+						<section class="accounts-list-section">
+							{categoriesError ? (
+								<p class="error-banner" role="alert">
+									{categoriesError}
+								</p>
+							) : null}
+
+							{!isLoadingCategories && !categoriesError && categories.length === 0 ? (
+								<div class="accounts-stack">
+									<div class="account-row-card">
+										<p class="panel-copy">No categories found for this user yet.</p>
+									</div>
 								</div>
-							</div>
-						) : null}
+							) : null}
 
-						{!isLoadingCategories && categories.length > 0 ? (
-							<div class="category-sections">
-								<section class="category-section">
-									<div class="section-heading">
-										<div>
-											<p class="panel-label">Expenses</p>
-										</div>
-									</div>
-
-									<div class="accounts-stack">
-										{expenseCategories.length > 0 ? (
-											expenseCategories.map((category) => (
-												<button
-													type="button"
-													class="account-row-card"
-													key={category.id}
-													onClick={() => openEditModal(category)}
-												>
-													<div class="account-leading">
-														<div class="account-icon-wrap" aria-hidden="true">
-															{category.icon?.url ? (
-																<img
-																	src={category.icon.url}
-																	alt=""
-																	class="account-icon"
-																	loading="lazy"
-																/>
-															) : (
-																<span class="account-icon-fallback">
-																	{category.name.slice(0, 1).toUpperCase()}
-																</span>
-															)}
-														</div>
-
-														<div class="account-copy">
-															<h3>{category.name}</h3>
-														</div>
-													</div>
-												</button>
-											))
-										) : (
-											<div class="account-row-card">
-												<p class="panel-copy">No expense categories yet.</p>
+							{!isLoadingCategories && categories.length > 0 ? (
+								<div class="category-sections">
+									<section class="category-section">
+										<div class="section-heading">
+											<div>
+												<p class="panel-label">Expenses</p>
 											</div>
-										)}
-									</div>
-								</section>
-
-								<section class="category-section">
-									<div class="section-heading">
-										<div>
-											<p class="panel-label">Incomes</p>
 										</div>
-									</div>
 
-									<div class="accounts-stack">
-										{incomeCategories.length > 0 ? (
-											incomeCategories.map((category) => (
-												<button
-													type="button"
-													class="account-row-card"
-													key={category.id}
-													onClick={() => openEditModal(category)}
-												>
-													<div class="account-leading">
-														<div class="account-icon-wrap" aria-hidden="true">
-															{category.icon?.url ? (
-																<img
-																	src={category.icon.url}
-																	alt=""
-																	class="account-icon"
-																	loading="lazy"
-																/>
-															) : (
-																<span class="account-icon-fallback">
-																	{category.name.slice(0, 1).toUpperCase()}
-																</span>
-															)}
-														</div>
+										<div class="accounts-stack">
+											{expenseCategories.length > 0 ? (
+												expenseCategories.map((category) => (
+													<button
+														type="button"
+														class="account-row-card"
+														key={category.id}
+														onClick={() => openEditModal(category)}
+													>
+														<div class="account-leading">
+															<div class="account-icon-wrap" aria-hidden="true">
+																{category.icon?.url ? (
+																	<img
+																		src={category.icon.url}
+																		alt=""
+																		class="account-icon"
+																		loading="lazy"
+																	/>
+																) : (
+																	<span class="account-icon-fallback">
+																		{category.name.slice(0, 1).toUpperCase()}
+																	</span>
+																)}
+															</div>
 
-														<div class="account-copy">
-															<h3>{category.name}</h3>
+															<div class="account-copy">
+																<h3>{category.name}</h3>
+															</div>
 														</div>
-													</div>
-												</button>
-											))
-										) : (
-											<div class="account-row-card">
-												<p class="panel-copy">No income categories yet.</p>
+													</button>
+												))
+											) : (
+												<div class="account-row-card">
+													<p class="panel-copy">No expense categories yet.</p>
+												</div>
+											)}
+										</div>
+									</section>
+
+									<section class="category-section">
+										<div class="section-heading">
+											<div>
+												<p class="panel-label">Incomes</p>
 											</div>
-										)}
-									</div>
-								</section>
-							</div>
-						) : null}
-					</section>
+										</div>
+
+										<div class="accounts-stack">
+											{incomeCategories.length > 0 ? (
+												incomeCategories.map((category) => (
+													<button
+														type="button"
+														class="account-row-card"
+														key={category.id}
+														onClick={() => openEditModal(category)}
+													>
+														<div class="account-leading">
+															<div class="account-icon-wrap" aria-hidden="true">
+																{category.icon?.url ? (
+																	<img
+																		src={category.icon.url}
+																		alt=""
+																		class="account-icon"
+																		loading="lazy"
+																	/>
+																) : (
+																	<span class="account-icon-fallback">
+																		{category.name.slice(0, 1).toUpperCase()}
+																	</span>
+																)}
+															</div>
+
+															<div class="account-copy">
+																<h3>{category.name}</h3>
+															</div>
+														</div>
+													</button>
+												))
+											) : (
+												<div class="account-row-card">
+													<p class="panel-copy">No income categories yet.</p>
+												</div>
+											)}
+										</div>
+									</section>
+								</div>
+							) : null}
+						</section>
+					</div>
 				</AppHeader>
 			) : null}
 
