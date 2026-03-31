@@ -101,7 +101,7 @@ export function CategoryExpenseChart({
 					</div>
 				</div>
 			) : (
-				<div class="account-row-card expense-breakdown-empty">
+				<div class="item-row-card expense-breakdown-empty">
 					<p class="panel-copy">{emptyMessage}</p>
 				</div>
 			)}

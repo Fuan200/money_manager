@@ -32,7 +32,7 @@ export function CategoryFormModal({
 	return (
 		<div class="modal-backdrop" onClick={onClose}>
 			<section
-				class="modal-card account-form-card"
+				class="modal-card entity-form-card"
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="category-form-title"
@@ -51,7 +51,7 @@ export function CategoryFormModal({
 					</button>
 				</div>
 
-				<form class="account-form" onSubmit={onSubmit}>
+				<form class="entity-form" onSubmit={onSubmit}>
 					<label class="field">
 						<span>Name</span>
 						<input

@@ -2,7 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 
 interface AppHeaderProps {
-	activeTab: 'home' | 'accounts' | 'categories';
+	activeTab: 'home' | 'categories';
 	onSignOut: () => void;
 	children: ComponentChildren;
 }
@@ -12,29 +12,6 @@ function HomeIcon() {
 		<svg viewBox="0 0 24 24" aria-hidden="true">
 			<path
 				d="M4.75 10.25 12 4.5l7.25 5.75v8a1 1 0 0 1-1 1h-4.5v-5h-3.5v5h-4.5a1 1 0 0 1-1-1z"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.8"
-			/>
-		</svg>
-	);
-}
-
-function AccountsIcon() {
-	return (
-		<svg viewBox="0 0 24 24" aria-hidden="true">
-			<path
-				d="M4.75 7.75a2 2 0 0 1 2-2h10.5a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H6.75a2 2 0 0 1-2-2z"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.8"
-			/>
-			<path
-				d="M4.75 10h14.5M8 14.25h2.5"
 				fill="none"
 				stroke="currentColor"
 				stroke-linecap="round"
@@ -100,16 +77,6 @@ export function AppHeader({ activeTab, onSignOut, children }: AppHeaderProps) {
 							<HomeIcon />
 						</span>
 						<span class="app-tab-label">Home</span>
-					</a>
-					<a
-						href="/accounts"
-						class={`app-tab ${activeTab === 'accounts' ? 'is-active' : ''}`}
-						aria-current={activeTab === 'accounts' ? 'page' : undefined}
-					>
-						<span class="app-tab-icon">
-							<AccountsIcon />
-						</span>
-						<span class="app-tab-label">Accounts</span>
 					</a>
 					<a
 						href="/categories"

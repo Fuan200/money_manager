@@ -1288,7 +1288,7 @@ button,
 	color: var(--color-text-soft);
 }
 
-.account-form-card {
+.entity-form-card {
 	display: grid;
 	gap: 1.5rem;
 }
@@ -1366,12 +1366,12 @@ button,
 	margin: 0;
 }
 
-.account-form {
+.entity-form {
 	display: grid;
 	gap: 1rem;
 }
 
-.accounts-list-section {
+.item-list-section {
 	/* display: grid; */
 	gap: 1rem;
 }
@@ -1382,12 +1382,12 @@ button,
 }
 
 .section-heading h2,
-.account-copy h3 {
+.item-copy h3 {
 	margin: 0;
 	letter-spacing: -0.04em;
 }
 
-.accounts-stack {
+.item-stack {
 	display: grid;
 	gap: 0.85rem;
 }
@@ -1405,11 +1405,11 @@ button,
 	align-content: start;
 }
 
-.category-section .accounts-stack {
+.category-section .item-stack {
 	align-content: start;
 }
 
-.account-row-card {
+.item-row-card {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -1427,25 +1427,25 @@ button,
 		box-shadow var(--transition-standard);
 }
 
-.account-row-card:hover,
-.account-row-card:focus-visible {
+.item-row-card:hover,
+.item-row-card:focus-visible {
 	border-color: rgba(var(--color-pearl-aqua-rgb), 0.32);
 	box-shadow: var(--shadow-elevated);
 	transform: translateY(-1px);
 }
 
-.account-row-card:active {
+.item-row-card:active {
 	transform: scale(0.99);
 }
 
-.account-leading {
+.item-leading {
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 	min-width: 0;
 }
 
-.account-icon-wrap {
+.item-icon-wrap {
 	display: grid;
 	place-items: center;
 	width: 3rem;
@@ -1457,30 +1457,30 @@ button,
 	flex-shrink: 0;
 }
 
-.account-icon {
+.item-icon {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 }
 
-.account-icon-fallback {
+.item-icon-fallback {
 	color: var(--color-accent-strong);
 	font-size: 1rem;
 	font-weight: 700;
 }
 
-.account-copy {
+.item-copy {
 	min-width: 0;
 }
 
-.account-meta {
+.item-meta {
 	margin: 0.35rem 0 0;
 	color: var(--color-text-soft);
 	font-size: 0.92rem;
 	line-height: 1.4;
 }
 
-.account-balance {
+.item-balance {
 	margin: 0;
 	color: var(--color-text);
 	font-size: clamp(1.1rem, 2vw, 1.35rem);
@@ -1490,11 +1490,11 @@ button,
 	font-variant-numeric: tabular-nums slashed-zero;
 }
 
-.account-balance.is-debit {
+.item-balance.is-debit {
 	color: var(--color-text);
 }
 
-.account-balance.is-credit {
+.item-balance.is-credit {
 	color: var(--color-text-muted);
 }
 
@@ -1556,16 +1556,16 @@ button,
 	text-align: left;
 }
 
-.transaction-row .account-leading {
+.transaction-row .item-leading {
 	flex: 1 1 auto;
 }
 
-.transaction-row .account-copy {
+.transaction-row .item-copy {
 	width: 100%;
 }
 
-.transaction-row .account-copy h3,
-.transaction-row .account-meta {
+.transaction-row .item-copy h3,
+.transaction-row .item-meta {
 	text-align: left;
 }
 
@@ -1666,7 +1666,7 @@ button,
 		border-bottom: 1px solid rgba(var(--color-pearl-aqua-rgb), 0.12);
 	}
 
-	.account-row-card {
+	.item-row-card {
 		align-items: flex-start;
 		flex-direction: column;
 	}
