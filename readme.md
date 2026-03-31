@@ -3,6 +3,7 @@
 Money Manager es una aplicación web completa para el manejo de finanzas personales.
 
 `NOTA`: Al crear una cuenta, se crean datos de prueba para la demo.
+
 Enlace a la demo: http://money-manager-frontend-hhlrx6-984dec-107-148-105-18.traefik.me/
 
 ## Features
