@@ -313,15 +313,14 @@ export function AccountsDashboard() {
 	};
 
 	return (
-		<section class="app-shell">
-			{sessionState ? <AppHeader activeTab="accounts" onSignOut={handleSignOut} /> : null}
-
-			<div class="app-content">
-				{sessionState ? (
+		<section>
+			{sessionState ? (
+				<AppHeader
+					activeTab="accounts"
+					onSignOut={handleSignOut}
+				>
 					<TotalBalanceCard totalBalance={totalBalance} />
-				) : null}
 
-				{sessionState ? (
 					<button
 						type="button"
 						class="primary-button"
@@ -329,76 +328,76 @@ export function AccountsDashboard() {
 					>
 						New account
 					</button>
-				) : null}
 
-				{submitSuccess ? (
-					<p class="success-banner" role="status">
-						{submitSuccess}
-					</p>
-				) : null}
-
-				<section class="accounts-list-section">
-					{accountsError ? (
-						<p class="error-banner" role="alert">
-							{accountsError}
+					{submitSuccess ? (
+						<p class="success-banner" role="status">
+							{submitSuccess}
 						</p>
 					) : null}
 
-					{sessionState && !isLoadingAccounts && !accountsError && accounts.length === 0 ? (
-						<div class="accounts-stack">
-							<div class="account-row-card">
-								<p class="panel-copy">No accounts found for this user yet.</p>
+					<section class="accounts-list-section">
+						{accountsError ? (
+							<p class="error-banner" role="alert">
+								{accountsError}
+							</p>
+						) : null}
+
+						{!isLoadingAccounts && !accountsError && accounts.length === 0 ? (
+							<div class="accounts-stack">
+								<div class="account-row-card">
+									<p class="panel-copy">No accounts found for this user yet.</p>
+								</div>
 							</div>
-						</div>
-					) : null}
+						) : null}
 
-					{sessionState && !isLoadingAccounts && accounts.length > 0 ? (
-						<div class="accounts-stack">
-							{accounts.map((account) => (
-								<button
-									type="button"
-									class="account-row-card"
-									key={account.id}
-									onClick={() => openEditModal(account)}
-								>
-									<div class="account-leading">
-										<div class="account-icon-wrap" aria-hidden="true">
-											{account.icon?.url ? (
-												<img
-													src={account.icon.url}
-													alt=""
-													class="account-icon"
-													loading="lazy"
-												/>
-											) : (
-												<span class="account-icon-fallback">
-													{account.name.slice(0, 1).toUpperCase()}
-												</span>
-											)}
+						{!isLoadingAccounts && accounts.length > 0 ? (
+							<div class="accounts-stack">
+								{accounts.map((account) => (
+									<button
+										type="button"
+										class="account-row-card"
+										key={account.id}
+										onClick={() => openEditModal(account)}
+									>
+										<div class="account-leading">
+											<div class="account-icon-wrap" aria-hidden="true">
+												{account.icon?.url ? (
+													<img
+														src={account.icon.url}
+														alt=""
+														class="account-icon"
+														loading="lazy"
+													/>
+												) : (
+													<span class="account-icon-fallback">
+														{account.name.slice(0, 1).toUpperCase()}
+													</span>
+												)}
+											</div>
+
+											<div class="account-copy">
+												<h3>{account.name}</h3>
+												<p class="account-meta">
+													{account.is_debit ? 'Debit' : 'Credit'}
+													{account.saving ? ' | Savings' : ' | Standard'}
+													{account.balance_include ? ' | Included in totals' : ' | Excluded from totals'}
+												</p>
+											</div>
 										</div>
 
-										<div class="account-copy">
-											<h3>{account.name}</h3>
-											<p class="account-meta">
-												{account.is_debit ? 'Debit' : 'Credit'}
-												{account.saving ? ' | Savings' : ' | Standard'}
-												{account.balance_include ? ' | Included in totals' : ' | Excluded from totals'}
-											</p>
-										</div>
-									</div>
-
-									<AnimatedAmount
-										value={formatCurrencyValue(account.balance, {
-											multiplier: account.is_debit ? 1 : -1,
-										})}
-										className={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}
-									/>
-								</button>
-							))}
-						</div>
-					) : null}
-				</section>
-			</div>
+										<AnimatedAmount
+											value={formatCurrencyValue(account.balance, {
+												multiplier: account.is_debit ? 1 : -1,
+											})}
+											className={`account-balance ${account.is_debit ? 'is-debit' : 'is-credit'}`}
+										/>
+									</button>
+								))}
+							</div>
+						) : null}
+					</section>
+				</AppHeader>
+			) : null}
 
 			{!hasCheckedSession || !sessionState || isLoadingAccounts ? <LoadingOverlay label="Loading accounts" /> : null}
 

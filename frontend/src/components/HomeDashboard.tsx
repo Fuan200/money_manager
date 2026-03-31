@@ -435,113 +435,109 @@ export function HomeDashboard() {
 	};
 
 	return (
-		<section class="app-shell">
-			{sessionState ? <AppHeader activeTab="home" onSignOut={handleSignOut} /> : null}
+		<section>
+			{sessionState ? (
+				<AppHeader
+					activeTab="home"
+					onSignOut={handleSignOut}
+				>
+					<TotalBalanceCard totalBalance={totalBalance} />
 
-			<div class="app-content">
-				{sessionState ? (
-					<>
-						<TotalBalanceCard totalBalance={totalBalance} />
-						<CategoryExpenseChart
-							items={categoryBreakdown}
-							title={chartTitle}
-							totalLabel={chartTotalLabel}
-							emptyMessage={chartEmptyMessage}
-							controls={
-								<>
-									<button type="button" class="primary-button expense-breakdown-action" onClick={openTransactionModal}>
-										New transaction
+					<CategoryExpenseChart
+						items={categoryBreakdown}
+						title={chartTitle}
+						totalLabel={chartTotalLabel}
+						emptyMessage={chartEmptyMessage}
+						controls={
+							<>
+								<button type="button" class="primary-button expense-breakdown-action" onClick={openTransactionModal}>
+									New transaction
+								</button>
+
+								<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
+									<button
+										type="button"
+										role="tab"
+										class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
+										aria-selected={activeTransactionTab === 'expenses'}
+										onClick={() => setActiveTransactionTab('expenses')}
+									>
+										Expenses
 									</button>
+									<button
+										type="button"
+										role="tab"
+										class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
+										aria-selected={activeTransactionTab === 'incomes'}
+										onClick={() => setActiveTransactionTab('incomes')}
+									>
+										Incomes
+									</button>
+								</div>
+							</>
+						}
+					/>
 
-									<div class="transaction-tabs" role="tablist" aria-label="Transaction type filters">
-										<button
-											type="button"
-											role="tab"
-											class={`transaction-tab ${activeTransactionTab === 'expenses' ? 'is-active' : ''}`}
-											aria-selected={activeTransactionTab === 'expenses'}
-											onClick={() => setActiveTransactionTab('expenses')}
-										>
-											Expenses
-										</button>
-										<button
-											type="button"
-											role="tab"
-											class={`transaction-tab ${activeTransactionTab === 'incomes' ? 'is-active' : ''}`}
-											aria-selected={activeTransactionTab === 'incomes'}
-											onClick={() => setActiveTransactionTab('incomes')}
-										>
-											Incomes
-										</button>
-									</div>
-								</>
-							}
-						/>
-					</>
-				) : null}
+					{submitSuccess ? (
+						<p class="success-banner" role="status">
+							{submitSuccess}
+						</p>
+					) : null}
 
-				{submitSuccess ? (
-					<p class="success-banner" role="status">
-						{submitSuccess}
-					</p>
-				) : null}
+					<section class="accounts-list-section">
+						{filteredTransactions.length > 0 ? (
+							<div class="transactions-stack">
+								{filteredTransactions.map((transaction) => (
+									(() => {
+										const category = findCategory(transaction.category_id);
+										const account = findAccount(transaction.account_id);
+										const categoryName = category?.name ?? 'Unknown category';
+										const accountName = account?.name ?? 'Unknown account';
 
-				{sessionState ? (
-					<>
-						<section class="accounts-list-section">
-							{filteredTransactions.length > 0 ? (
-								<div class="transactions-stack">
-									{filteredTransactions.map((transaction) => (
-										(() => {
-											const category = findCategory(transaction.category_id);
-											const account = findAccount(transaction.account_id);
-											const categoryName = category?.name ?? 'Unknown category';
-											const accountName = account?.name ?? 'Unknown account';
-
-											return (
-												<button
-													type="button"
-													class="transaction-row"
-													key={transaction.id}
-													onClick={() => openEditTransactionModal(transaction)}
-												>
-													<div class="account-leading">
-														<div class="account-icon-wrap" aria-hidden="true">
-															<span class="account-icon-fallback">
-																{categoryName.slice(0, 1).toUpperCase()}
-															</span>
-														</div>
-
-														<div class="account-copy">
-															<h3>{categoryName}</h3>
-															<p class="account-meta">
-																{transaction.description} | {accountName}
-															</p>
-														</div>
+										return (
+											<button
+												type="button"
+												class="transaction-row"
+												key={transaction.id}
+												onClick={() => openEditTransactionModal(transaction)}
+											>
+												<div class="account-leading">
+													<div class="account-icon-wrap" aria-hidden="true">
+														<span class="account-icon-fallback">
+															{categoryName.slice(0, 1).toUpperCase()}
+														</span>
 													</div>
 
-													<AnimatedAmount
-														value={formatCurrencyValue(transaction.amount, {
-															multiplier: transaction.type ? 1 : -1,
-															positivePrefix: transaction.type ? '+' : undefined,
-														})}
-														className={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}
-													/>
-												</button>
-											);
-										})()
-									))}
-								</div>
-							) : (
-								<div class="account-row-card">
-									<p class="panel-copy">
-										No {activeTransactionTab === 'expenses' ? 'expenses' : 'incomes'} yet.
-									</p>
-								</div>
-							)}
-						</section>
-					</>
-				) : null}
-			</div>
+													<div class="account-copy">
+														<h3>{categoryName}</h3>
+														<p class="account-meta">
+															{transaction.description} | {accountName}
+														</p>
+													</div>
+												</div>
+
+												<AnimatedAmount
+													value={formatCurrencyValue(transaction.amount, {
+														multiplier: transaction.type ? 1 : -1,
+														positivePrefix: transaction.type ? '+' : undefined,
+													})}
+													className={`transaction-amount ${transaction.type ? 'is-income' : 'is-expense'}`}
+												/>
+											</button>
+										);
+									})()
+								))}
+							</div>
+						) : (
+							<div class="account-row-card">
+								<p class="panel-copy">
+									No {activeTransactionTab === 'expenses' ? 'expenses' : 'incomes'} yet.
+								</p>
+							</div>
+						)}
+					</section>
+				</AppHeader>
+			) : null}
 
 			{!hasCheckedSession || !sessionState || isLoadingOptions ? <LoadingOverlay label="Loading home" /> : null}
 
